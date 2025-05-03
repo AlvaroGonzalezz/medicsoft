@@ -1,0 +1,290 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: auto;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: auto;
+    background: linear-gradient(315deg, rgb(0, 101, 96) 3%, rgb(12, 101, 76) 38%, rgba(23, 164, 115, 0.716) 68%, rgb(4, 109, 69) 98%);
+    animation: gradient 15s ease infinite;
+    background-size: 400% 400%;
+    background-attachment: fixed;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+.wave {
+    background: rgb(255 255 255 / 25%);
+    border-radius: 1000% 1000% 0 0;
+    position: fixed;
+    width: 200%;
+    height: 12em;
+    animation: wave 10s -3s linear infinite;
+    transform: translate3d(0, 0, 0);
+    opacity: 0.8;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.wave:nth-of-type(2) {
+    bottom: -1.25em;
+    animation: wave 18s linear reverse infinite;
+    opacity: 0.8;
+}
+
+.wave:nth-of-type(3) {
+    bottom: -2.5em;
+    animation: wave 20s -1s reverse infinite;
+    opacity: 0.9;
+}
+
+@keyframes wave {
+    2% {
+        transform: translateX(1);
+    }
+
+    25% {
+        transform: translateX(-25%);
+    }
+
+    50% {
+        transform: translateX(-50%);
+    }
+
+    75% {
+        transform: translateX(-25%);
+    }
+
+    100% {
+        transform: translateX(1);
+    }
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    height: 100vh; /* Solo altura de la pantalla */
+    overflow: hidden;
+    position: relative;
+}
+
+/* Sección de inicio con video */
+.inicio {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* Estilo para el video de fondo */
+.inicio video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    z-index: 1;
+}
+
+/* Contenido encima del video */
+.contenido {
+    width: 90%;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: white;
+    padding: 20px;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    max-width: 90%;
+}
+
+/* Logo */
+.contenido img {
+    width: 120px;
+    margin-bottom: 20px;
+}
+
+/* Títulos */
+.contenido h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.contenido h5 {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+/* Botón "Continuar" */
+.contenido a {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #30807a;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.contenido a:hover {
+    background-color: #0b4844;
+}
+
+.info {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 50px 20px;
+    background-color: #ffffffd2;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Columna de imagen (50% ancho) */
+.info .columna-imagen {
+    flex: 1 1 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info .columna-imagen img {
+    width: 50%;
+    max-width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.219);
+    border: solid 5px #30807a; 
+    margin-bottom: 20px;
+}
+
+/* Columna de texto (50% ancho) */
+.info .columna-texto {
+    flex: 1 1 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Título llamativo */
+.columna-texto h2 {
+    font-size: 2.8rem;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    line-height: 1.2;
+}
+
+.columna-texto h2 span {
+    color: #30807a; /* Verde moderno */
+}
+
+/* Párrafo */
+.columna-texto p {
+    font-size: 1.3rem !important;
+    color: #34495e;
+    line-height: 1.8;
+    margin-bottom: 30px;
+}
+
+/* Lista */
+.columna-texto ul {
+    text-align: left;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 30px 0;
+}
+
+.columna-texto ul li {
+    margin-bottom: 12px;
+    font-size: 1.3rem !important;
+    color: #2c3e50;
+    padding-left: 30px;
+    position: relative;
+}
+
+.columna-texto ul li::before {
+    content: "☑";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #10788a;
+}
+
+/* Botón */
+.columna-texto .btn {
+    width: 25%;
+    margin: 0 auto;
+    padding: 12px 25px;
+    background-color: #30807a;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 30px;
+    font-size: 1.4rem;
+    transition: background 0.3s ease;
+    margin-top: 20px;
+
+}
+
+.columna-texto .btn:hover {
+    background-color: #0b5a68;
+}
+.lista-funciones {
+    display: flex;
+    margin: 0 auto;
+}
+
+
+/* Responsive */
+@media (min-width: 768px) {
+    .contenido h1 {
+        font-size: 4rem;
+    }
+    .contenido h5 {
+        font-size: 1.5rem;
+        margin-top: 40px;
+        margin-bottom: 40px;
+    }
+    .contenido img {
+        width: 200px;
+    }
+    .contenido a {
+        padding: 15px 30px;
+        font-size: 1.7rem;
+    }
+    .info {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .info .columna-texto h2 {
+        font-size: 2rem;
+    }
+
+    .info .columna-texto p {
+        font-size: 1rem;
+    }
+}
