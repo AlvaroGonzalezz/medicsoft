@@ -209,6 +209,16 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+.swal2-confirm {
+  background: #30807a !important;
+  background-color: #30807a !important;
+  --swal2-action-button-outline: 0 0 0 3px rgba(48, 128, 122, 0.5) !important;
+}
+.swal2-confirm:hover {
+  background: #0b4a46 !important;
+  background-color: #0b4a46 !important;
+  --swal2-action-button-outline: 0 0 0 3px rgba(48, 128, 122, 0.5) !important;
+}
 hr {
   margin: 1rem 0;
   color: inherit;
