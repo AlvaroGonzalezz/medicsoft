@@ -1,6 +1,6 @@
 <?php
 include("conexion.php");
-
+echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
 // Recibir datos del formulario
 $nombre = $_POST["nombre"];
 $apellidos = $_POST["apellidos"];
@@ -47,9 +47,61 @@ $sql = "INSERT INTO usuarios (
     '$historial_medico', '$fotografia_rostro', '$fecha_registro'
 )";
 
-if ($conexion->query($sql) === TRUE) {
-    echo "¡Registro exitoso!";
-} else {
-    echo "Error: " . $sql . "<br>" . $conexion->error;
+try {
+    if ($conexion->query($sql) === TRUE) {
+        echo "
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: '¡Registro exitoso!',
+                text: 'Inicia sesión para continuar.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            }).then((result) => {
+                if (result.isConfirmed || result.dismiss) {
+                    window.location.href = 'login.php';
+                }
+            });
+        });
+        </script>
+        ";
+    }
+} catch (mysqli_sql_exception $e) {
+    // Si es duplicado
+    if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+        echo "
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: 'Error de registro',
+                text: 'El CURP o correo electrónico ya está registrado.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            }).then((result) => {
+                if (result.isConfirmed || result.dismiss) {
+                    window.history.back();
+                }
+            });
+        });
+        </script>
+        ";
+    } else {
+        // Otro error
+        echo "
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: 'Error inesperado',
+                text: 'Hubo un problema al registrar. Intenta nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            }).then((result) => {
+                if (result.isConfirmed || result.dismiss) {
+                    window.history.back();
+                }
+            });
+        });
+        </script>
+        ";
+    }
 }
-?>

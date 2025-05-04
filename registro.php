@@ -57,7 +57,7 @@ include 'conexion.php';
 						<input type="text" name="ciudad" id="ciudad" class="input-text" placeholder="Ciudad" required>
 					</div>
 					<div class="form-row">
-						<select name="estado">
+						<select name="estado" required>
 						  <option value="">Selecciona Estado</option>
 						  <option value="aguascalientes">Aguascalientes</option>
 						  <option value="baja_california">Baja California</option>
@@ -123,19 +123,19 @@ include 'conexion.php';
 						</span>
 					  </div>
 					  <div class="form-row">
-    <input type="text" name="enfermedadesCronicas" class="street" id="enfermedades-cronicas" placeholder="Enfermedades Crónicas" required>
+    <input type="text" name="enfermedadesCronicas" class="street" id="enfermedades-cronicas" placeholder="Enfermedades Crónicas">
 </div>
 <div class="form-row">
-    <input type="text" name="alergias" class="additional" id="alergias" placeholder="Alergias" required>
+    <input type="text" name="alergias" class="additional" id="alergias" placeholder="Alergias">
 </div>
 <div class="form-row">
-    <input type="text" name="cirugiasRealizadas" class="additional" id="cirugias-realizadas" placeholder="Cirugías Realizadas" required>
+    <input type="text" name="cirugiasRealizadas" class="additional" id="cirugias-realizadas" placeholder="Cirugías Realizadas">
 </div>
 <div class="form-row">
-    <input type="text" name="prohibicionesMedicas" class="additional" id="prohibiciones-medicas" placeholder="Prohibiciones Médicas" required>
+    <input type="text" name="prohibicionesMedicas" class="additional" id="prohibiciones-medicas" placeholder="Prohibiciones Médicas">
 </div>
 <div class="form-row">
-    <input type="text" name="especificacionesMedicas" class="additional" id="especificaciones-medicas" placeholder="Especificaciones Médicas" required>
+    <input type="text" name="especificacionesMedicas" class="additional" id="especificaciones-medicas" placeholder="Especificaciones Médicas" >
 </div>
 
 <div class="form-row">
@@ -161,6 +161,7 @@ include 'conexion.php';
 	<div class="page-content btnVolver">
 		<a href="index.html">⬅ Volver</a>
 	</div>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </body>
 </html>
