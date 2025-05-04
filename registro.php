@@ -21,8 +21,10 @@ include 'conexion.php';
 	<h1>Registro</h1>
 	<p>Registra tu información con tranquilidad, nuestro sistema es totalmente seguro. Si ya te has registrado inicia sesión pulsando <a href="login.html">aquí</a></p>
 	<div class="page-content">
-		<div class="form-v10-content">
-			<form class="form-detail" action="#" method="post" id="myform">
+	<div class="form-v10-content">
+    <form class="form-detail" action="RegistroUsuario.php" method="post" id="myform" enctype="multipart/form-data">
+
+
 				
 				<div class="form-left">
 					<h2>Información General 📝</h2>
@@ -38,16 +40,16 @@ include 'conexion.php';
 						
 					</div>
 					<div class="form-row form-row-2">
-						<input type="number" name="curp" class="phone" id="curp" placeholder="CURP" required>
+						<input type="text" name="curp" class="curp" id="curp" placeholder="CURP" required>
 					</div>
 					<div class="form-row form-row-2">
 						<input type="number" name="telefono" class="phone" id="telefono" placeholder="Teléfono" required>
 					</div>
 					<div class="form-row input-fecha">
-						<label for="additional" class="file-label2">Fecha Nacimiento</label>
+    <label for="fecha-nacimiento" class="file-label2">Fecha Nacimiento</label>
+    <input type="date" name="fecha-nacimiento" id="fecha-nacimiento" class="input-text" required>
+</div>
 
-						<input type="date" name="fecha-nacimiento" id="fecha-nacimiento" class="input-text" required>
-					</div>
 					<div class="form-row">
 						<input type="text" name="direccion" id="direccion" class="input-text" placeholder="Dirección" required>
 					</div>
@@ -120,32 +122,36 @@ include 'conexion.php';
 						  <i class="zmdi zmdi-chevron-down"></i>
 						</span>
 					  </div>
-					<div class="form-row">
-						<input type="text" name="enfemedades-cronicas" class="street" id="enfemedades-cronicas" placeholder="Enfermedades Crónicas" required>
-					</div>
-					<div class="form-row">
-						<input type="text" name="alergias" class="additional" id="alergias" placeholder="Alergias" required>
-					</div>
-					<div class="form-row">
-						<input type="text" name="additional" class="additional" id="additional" placeholder="Cirugías Realizadas" required>
-					</div>
-					<div class="form-row">
-						<input type="text" name="additional" class="additional" id="additional" placeholder="Prohibiciones Médicas" required>
-					</div>
-					<div class="form-row">
-						<input type="text" name="additional" class="additional" id="additional" placeholder="Especificaciones Médicas" required>
-					</div>
-					<div class="form-row">
-						<label for="additional" class="file-label">Documento del último Historial Médico</label>
-						<input type="file" name="additional" class="additional" id="additional" placeholder="Documento Historial Médico" required>
-					</div>
-					<div class="form-row">
-						<label for="additional" class="file-label">Fotografía de su rostro (Sin accesorios)</label>
-						<input type="file" name="additional" class="additional" id="additional" placeholder="Documento" required>
-					</div>
-					
-					<div class="form-row-last">
-						<input type="submit" name="register" class="register" value="Registrarme">
+					  <div class="form-row">
+    <input type="text" name="enfermedadesCronicas" class="street" id="enfermedades-cronicas" placeholder="Enfermedades Crónicas" required>
+</div>
+<div class="form-row">
+    <input type="text" name="alergias" class="additional" id="alergias" placeholder="Alergias" required>
+</div>
+<div class="form-row">
+    <input type="text" name="cirugiasRealizadas" class="additional" id="cirugias-realizadas" placeholder="Cirugías Realizadas" required>
+</div>
+<div class="form-row">
+    <input type="text" name="prohibicionesMedicas" class="additional" id="prohibiciones-medicas" placeholder="Prohibiciones Médicas" required>
+</div>
+<div class="form-row">
+    <input type="text" name="especificacionesMedicas" class="additional" id="especificaciones-medicas" placeholder="Especificaciones Médicas" required>
+</div>
+
+<div class="form-row">
+    <label for="historial-medico" class="file-label">Documento del último Historial Médico</label>
+    <input type="file" name="historialMedico" class="additional" id="historial-medico" placeholder="Documento Historial Médico" required>
+</div>
+
+<div class="form-row">
+    <label for="foto-rostro" class="file-label">Fotografía de su rostro (Sin accesorios)</label>
+    <input type="file" name="fotoRostro" class="additional" id="foto-rostro" placeholder="Documento" required>
+</div>
+
+<div class="form-row-last">
+    <input type="submit" name="register" class="register" value="Registrarme">
+</div>
+
 					</div>
 				</div>
 			</form>

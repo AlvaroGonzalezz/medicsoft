@@ -2,7 +2,7 @@
 $servidor = "localhost";
 $usuario = "root";
 $clave = "";
-$base = "medicsoft";
+$base = "registro_medico";
 $conexion = mysqli_connect($servidor, $usuario, $clave, $base);
 if (!$conexion) {
     die("Error de conexión: " . mysqli_connect_error());
