@@ -77,7 +77,7 @@ Let us know your thoughts below. And good luck with development!
 ## Demo
 
 - [Profile page](http://demos.creative-tim.com/soft-ui-dashboard/pages/profile.html?ref=readme-sud)
-- [Sign in page](http://demos.creative-tim.com/soft-ui-dashboard/pages/sign-in.html?ref=readme-sud)
+- [Sign in page](http://demos.creative-tim.com/soft-ui-dashboard/pages/cerrar_sesion.php?ref=readme-sud)
 - [Sign up page](https://demos.creative-tim.com/soft-ui-dashboard/pages/sign-up.html?ref=readme-sud)
 
 [View More](https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html?ref=readme-sud).

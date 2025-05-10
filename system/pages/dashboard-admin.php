@@ -1,3 +1,16 @@
+<?php
+session_start();
+
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Administrativo") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+
+// Obtener el nombre desde la sesión
+$nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administración';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -42,7 +55,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link  active" href="../pages/dashboard-admin.html">
+          <a class="nav-link  active" href="../pages/dashboard-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -77,7 +90,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/personal.html">
+          <a class="nav-link  " href="../pages/personal.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-person-arms-up"></i>
@@ -112,7 +125,7 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile.html">
+          <a class="nav-link  " href="../pages/profile-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -141,7 +154,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/sign-in.html">
+          <a class="nav-link  " href="../pages/cerrar_sesion.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
@@ -176,7 +189,7 @@
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?php echo htmlspecialchars($nombreAdmin); ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -224,7 +237,10 @@
     </nav>
     <!-- End Navbar -->
     <div class="container-fluid py-4">
+              <h4 class="mb-3">¡Hola <?php echo htmlspecialchars($nombreAdmin); ?>! 👋</h4>
+
       <div class="row">
+
         <div class="col-lg-6 col-12">
           <div class="row">
             <div class="col-lg-6 col-md-6 col-12">
@@ -248,7 +264,7 @@
               </a>
             </div>
             <div class="col-lg-6 col-md-6 col-12 mt-4 mt-md-0">
-              <a href="profile-admin.html">
+              <a href="profile-admin.php">
                 <div class="card">
                   <span class="mask bg-dark opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -270,7 +286,7 @@
           </div>
           <div class="row mt-4">
             <div class="col-lg-6 col-md-6 col-12">
-              <a href="personal.html">
+              <a href="personal.php">
                 <div class="card">
                   <span class="mask bg-dark opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -373,6 +389,7 @@
 
     // Ejecutar al cargar para que ya muestre el correcto según selección inicial
     cambiarIcono();
+
     function darAltaPaciente() {
       Swal.fire({
         title: 'Hospitalizar Paciente',
@@ -405,24 +422,23 @@
           if (!pacienteId) {
             Swal.showValidationMessage('¡Debes seleccionar un paciente!');
           } else {
-            return { pacienteId: pacienteId, observaciones: observaciones };
+            return {
+              pacienteId: pacienteId,
+              observaciones: observaciones
+            };
           }
         }
       }).then((result) => {
         if (result.isConfirmed) {
           let datos = result.value;
           // Aquí puedes redirigir o enviar datos
-          window.location.href = 'darAlta.php?idPaciente='
-            + encodeURIComponent(datos.pacienteId)
-            + '&observaciones='
-            + encodeURIComponent(datos.observaciones);
+          window.location.href = 'darAlta.php?idPaciente=' +
+            encodeURIComponent(datos.pacienteId) +
+            '&observaciones=' +
+            encodeURIComponent(datos.observaciones);
         }
       });
     }
-
-
-
-
   </script>
   <script>
     var ctx = document.getElementById("chart-bars").getContext("2d");
@@ -440,7 +456,7 @@
           backgroundColor: "#fff",
           data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
           maxBarThickness: 6
-        },],
+        }, ],
       },
       options: {
         responsive: true,
@@ -511,30 +527,30 @@
       data: {
         labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
         datasets: [{
-          label: "Mobile apps",
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-          maxBarThickness: 6
+            label: "Mobile apps",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#cb0c9f",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+            maxBarThickness: 6
 
-        },
-        {
-          label: "Websites",
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#3A416F",
-          borderWidth: 3,
-          backgroundColor: gradientStroke2,
-          fill: true,
-          data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
-          maxBarThickness: 6
-        },
+          },
+          {
+            label: "Websites",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#3A416F",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
+            maxBarThickness: 6
+          },
         ],
       },
       options: {

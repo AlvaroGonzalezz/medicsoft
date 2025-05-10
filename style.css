@@ -10,12 +10,27 @@ body {
     margin: auto;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     overflow: auto;
-    background: linear-gradient(315deg, rgb(0, 101, 96) 3%, rgb(12, 101, 76) 38%, rgba(23, 164, 115, 0.716) 68%, rgb(4, 109, 69) 98%);
+    background: linear-gradient(315deg, rgba(48,128,122,255) 3%, rgb(12, 101, 76) 38%, rgba(0, 63, 41, 0.716) 68%, rgba(48,128,122,255) 98%);
     animation: gradient 15s ease infinite;
     background-size: 400% 400%;
     background-attachment: fixed;
 }
-
+.swal2-confirm {
+    background: #30807a !important;
+    background-color: #30807a !important;
+    --swal2-action-button-outline: 0 0 0 3px rgba(48, 128, 122, 0.5) !important;
+  }
+  .swal2-confirm:hover {
+    background: #0b4a46 !important;
+    background-color: #0b4a46 !important;
+    --swal2-action-button-outline: 0 0 0 3px rgba(48, 128, 122, 0.5) !important;
+  }
+  .ya-cuenta a{
+    color: #30807a;
+    text-decoration: underline;
+    font-weight: bold;
+    font-style: oblique;
+  }
 @keyframes gradient {
     0% {
         background-position: 0% 0%;
@@ -173,11 +188,11 @@ body {
 }
 
 .info .columna-imagen img {
-    width: 50%;
+    width: 80%;
     max-width: 100%;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.219);
-    border: solid 5px #30807a; 
+    border: solid 5px #00191731; 
     margin-bottom: 20px;
 }
 
@@ -192,7 +207,7 @@ body {
 
 /* Título llamativo */
 .columna-texto h2 {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
     margin-bottom: 20px;
     color: #2c3e50;
     line-height: 1.2;
@@ -204,7 +219,7 @@ body {
 
 /* Párrafo */
 .columna-texto p {
-    font-size: 1.3rem !important;
+    font-size: 1rem !important;
     color: #34495e;
     line-height: 1.8;
     margin-bottom: 30px;
@@ -220,7 +235,7 @@ body {
 
 .columna-texto ul li {
     margin-bottom: 12px;
-    font-size: 1.3rem !important;
+    font-size: 1rem !important;
     color: #2c3e50;
     padding-left: 30px;
     position: relative;
@@ -236,14 +251,13 @@ body {
 
 /* Botón */
 .columna-texto .btn {
-    width: 25%;
     margin: 0 auto;
-    padding: 12px 25px;
+    padding: 22px 55px;
     background-color: #30807a;
     color: #fff;
     text-decoration: none;
     border-radius: 30px;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     transition: background 0.3s ease;
     margin-top: 20px;
 
@@ -281,10 +295,16 @@ body {
     }
 
     .info .columna-texto h2 {
-        font-size: 2rem;
+        font-size: 2.4rem;
     }
 
     .info .columna-texto p {
-        font-size: 1rem;
+        font-size: 1.4rem !important;
+    }
+    .columna-texto ul li{
+        font-size: 1.4rem !important;
+    }
+    .info .columna-imagen img {
+        width: 60%;
     }
 }

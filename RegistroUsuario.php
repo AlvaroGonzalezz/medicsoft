@@ -39,13 +39,14 @@ $sql = "INSERT INTO usuarios (
     nombre, apellidos, curp, telefono, fecha_nacimiento, direccion, ciudad, estado,
     correo_electronico, contrasena, tipo_sangre, enfermedades_cronicas, alergias,
     cirugias_realizadas, prohibiciones_medicas, especificaciones_medicas,
-    historial_medico, fotografia_rostro, fecha_registro
+    historial_medico, fotografia_rostro, fecha_registro, rol
 ) VALUES (
     '$nombre', '$apellidos', '$curp', '$telefono', '$fecha_nacimiento', '$direccion', '$ciudad', '$estado',
     '$correo_electronico', '$contrasena', '$tipo_sangre', '$enfermedades_cronicas', '$alergias',
     '$cirugias_realizadas', '$prohibiciones_medicas', '$especificaciones_medicas',
-    '$historial_medico', '$fotografia_rostro', '$fecha_registro'
+    '$historial_medico', '$fotografia_rostro', '$fecha_registro', 'Paciente'
 )";
+
 
 try {
     if ($conexion->query($sql) === TRUE) {

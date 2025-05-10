@@ -1,4 +1,22 @@
+<?php
+session_start();
 
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Administrativo") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+
+// Obtener el nombre desde la sesión
+$nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administración';
+$apellidosAdmin = isset($_SESSION['apellidos']) ? $_SESSION['apellidos'] : '';
+$curpAdmin = isset($_SESSION['curp']) ? $_SESSION['curp'] : '';
+$telefonoAdmin = isset($_SESSION['telefono']) ? $_SESSION['telefono'] : '';
+$fecha_nacimientoAdmin = isset($_SESSION['fecha_nacimiento']) ? $_SESSION['fecha_nacimiento'] : '';
+$correo_electronicoAdmin = isset($_SESSION['email']) ? $_SESSION['email'] : '';
+$contrasenaAdmin = isset($_SESSION['contrasena']) ? $_SESSION['contrasena'] : '';
+$idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -41,7 +59,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/dashboard-admin.html">
+          <a class="nav-link  " href="../pages/dashboard-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -76,7 +94,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/personal.html">
+          <a class="nav-link  " href="../pages/personal.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-person-arms-up"></i>
@@ -111,7 +129,7 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  active" href="../pages/profile-admin.html">
+          <a class="nav-link  active" href="../pages/profile-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -140,7 +158,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/sign-in.html">
+          <a class="nav-link  " href="../pages/cerrar_sesion.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
@@ -171,7 +189,7 @@
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?php echo htmlspecialchars($nombreAdmin); ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 pe-0 d-flex align-items-center">
@@ -279,7 +297,7 @@
               </div>
               <div>
                 <h5 class="mb-1 text-white font-weight-bolder">
-                  Alvaro Sánchez Glz
+                  <?php echo htmlspecialchars($nombreAdmin) . " " . htmlspecialchars($apellidosAdmin) ; ?>
                 </h5>
                 <p class="mb-0 text-white text-sm">
                   Personal Administrativo
@@ -302,33 +320,33 @@
                 <li class="list-group-item active">Información General 📝</li>
                 <li class="list-group-item">
                   <strong>ID:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Nombre(s)" value="Alec" disabled>
+                  <input type="text" class="form-control form-control-sm mt-1" placeholder="XXXX" value="<?php echo htmlspecialchars($idAdmin)  ?>" disabled>
                 </li>
                 
                 <li class="list-group-item">
                   <strong>CURP:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="CURP" value="XXXX000000HDFXXX00" disabled>
+                  <input type="text" class="form-control form-control-sm mt-1" placeholder="CURP" value="<?php echo htmlspecialchars($curpAdmin)  ?>" disabled>
                 </li>
                 <li class="list-group-item">
                   <strong>Nombre:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="CURP" value="XXXX000000HDFXXX00" disabled>
+                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Nombre completo" value="<?php echo htmlspecialchars($nombreAdmin) . ' ' . htmlspecialchars($apellidosAdmin) ?>" disabled>
                 </li>
                 <li class="list-group-item">
                   <strong>Teléfono:</strong>
-                  <input type="tel" class="form-control form-control-sm mt-1" placeholder="Teléfono" value="(44) 123 1234 123" disabled>
+                  <input type="tel" class="form-control form-control-sm mt-1" placeholder="Teléfono" value="<?php echo htmlspecialchars($telefonoAdmin)  ?>" disabled>
                 </li>
                 <li class="list-group-item">
                   <strong>Fecha de Nacimiento:</strong>
-                  <input type="date" class="form-control form-control-sm mt-1" value="1990-01-01" disabled>
+                  <input type="date" class="form-control form-control-sm mt-1" value="<?php echo htmlspecialchars($fecha_nacimientoAdmin)  ?>" disabled>
                 </li>
                 
                 <li class="list-group-item">
                   <strong>Correo Electrónico:</strong>
-                  <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="alecthompson@mail.com" disabled>
+                  <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="<?php echo htmlspecialchars($correo_electronicoAdmin)  ?>" disabled>
                 </li>
                 <li class="list-group-item">
                   <strong>Contraseña:</strong>
-                  <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="alecthompson@mail.com" disabled>
+                  <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="<?php echo htmlspecialchars($contrasenaAdmin)  ?>" disabled>
                 </li>
               </ul>
               

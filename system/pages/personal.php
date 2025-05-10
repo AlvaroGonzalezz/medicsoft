@@ -1,3 +1,20 @@
+<?php
+session_start();
+include '../../conexion.php';
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Administrativo") {
+  header("Location: ../../index.html"); // Si no es admin, lo manda al login
+  exit();
+}
+$sql = "SELECT id, curp, nombre, apellidos, fecha_nacimiento, telefono, correo_electronico, contrasena, rol FROM usuarios WHERE rol = 'Enfermero'";
+$result = $conexion->query($sql);
+
+$sql2 = "SELECT id, curp, nombre, apellidos, fecha_nacimiento, telefono, correo_electronico, contrasena, rol FROM usuarios WHERE rol = 'Medico'";
+$result2 = $conexion->query($sql2);
+
+$sql3 = "SELECT id, curp, nombre, apellidos, fecha_nacimiento, telefono, correo_electronico, contrasena, rol FROM usuarios WHERE rol = 'Administrativo'";
+$result3 = $conexion->query($sql3);
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,7 +52,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link " href="../pages/dashboard-admin.html">
+          <a class="nav-link " href="../pages/dashboard-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +87,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  active" href="../pages/personal.html">
+          <a class="nav-link  active" href="../pages/personal.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-person-arms-up"></i>
@@ -105,7 +122,7 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile-admin.html">
+          <a class="nav-link  " href="../pages/profile-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -134,7 +151,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/sign-in.html">
+          <a class="nav-link  " href="../pages/cerrar_sesion.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
@@ -301,57 +318,31 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Mario</td>
-                      <td class="text-sm">Antonio</td>
-                      <td class="text-sm">Antoniasdo</td>
-                      <td class="text-sm text-center">
-
-                        <button class="btn btn-primary me-2" onclick='abrirModalEditar({
-                          id: "SAGAS21312",
-                          curp: "Alvaro S. G.",
-                          nombre: "Alvaro",
-                          fechaNacimiento: "1990-05-09",
-                          telefono: "5551234567",
-                          correo: "alvaro@example.com",
-                          contrasena: "Antonio123",
-                          estadoLaboral: "Activo"
-                        })'>
-                          Editar
-                        <button class="btn btn-danger" onclick="window.location.href='https://www.ejemplo.com'">Dar de
-                          baja</button>
-
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Mario</td>
-                      <td class="text-sm">Antonio</td>
-                      <td class="text-sm">Antoniasdo</td>
-                      <td class="text-sm text-center">
-
-                        <button class="btn btn-primary"
-                          onclick="window.location.href='https://www.ejemplo.com'">Editar</button>
-                        <button class="btn btn-danger" onclick="window.location.href='https://www.ejemplo.com'">Dar de
-                          baja</button>
-
-                      </td>
-                    </tr>
+                    <?php while ($row = $result->fetch_assoc()) { ?>
+                      <tr>
+                        <td class="text-sm"><?php echo $row['id']; ?></td>
+                        <td class="text-sm"><?php echo $row['curp']; ?></td>
+                        <td class="text-sm"><?php echo $row['nombre'] . ' ' . $row['apellidos']; ?></td>
+                        <td class="text-sm"><?php echo $row['fecha_nacimiento']; ?></td>
+                        <td class="text-sm"><?php echo $row['telefono']; ?></td>
+                        <td class="text-sm"><?php echo $row['correo_electronico']; ?></td>
+                        <td class="text-sm"><?php echo $row['contrasena']; ?></td>
+                        <td class="text-sm"><?php echo $row['rol']; ?></td>
+                        <td class="text-sm text-center">
+                          <button class="btn btn-primary me-2" onclick='abrirModalEditar(<?php echo json_encode($row); ?>)'>Editar</button>
+                          <button class="btn btn-danger" onclick="darDeBaja(<?php echo $row['id']; ?>)"><i class="bi bi-person-x-fill"></i></button>
+                        </td>
+                      </tr>
+                    <?php } ?>
                   </tbody>
+
                 </table>
               </div>
             </div>
           </div>
-          <button class="btn btn-primary mt-5" onclick="window.location.href='https://www.ejemplo.com'"><i
+          <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#guardarMedicoModal">
+
+            <i
               class="bi bi-plus"></i> Nuevo Médico</button>
 
           <div class="card">
@@ -372,54 +363,35 @@
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Correo Electrónico
                       </th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Contraseña</th>
-                      
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Estado Laboral</th>
+
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Mario</td>
-                      <td class="text-sm">Antonio</td>
-                      <td class="text-sm">Antoniasdo</td>
-                      <td class="text-sm text-center">
-
-                        <button class="btn btn-primary"
-                          onclick="window.location.href='https://www.ejemplo.com'">Editar</button>
-                        <button class="btn btn-danger" onclick="window.location.href='https://www.ejemplo.com'">Dar de
-                          baja</button>
-
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Mario</td>
-                      <td class="text-sm">Antonio</td>
-                      <td class="text-sm">Antoniasdo</td>
-                      <td class="text-sm text-center">
-
-                        <button class="btn btn-primary"
-                          onclick="window.location.href='https://www.ejemplo.com'">Editar</button>
-                        <button class="btn btn-danger" onclick="window.location.href='https://www.ejemplo.com'">Dar de
-                          baja</button>
-
-                      </td>
-                    </tr>
+                    <?php while ($row = $result2->fetch_assoc()) { ?>
+                      <tr>
+                        <td class="text-sm"><?php echo $row['id']; ?></td>
+                        <td class="text-sm"><?php echo $row['curp']; ?></td>
+                        <td class="text-sm"><?php echo $row['nombre'] . ' ' . $row['apellidos']; ?></td>
+                        <td class="text-sm"><?php echo $row['fecha_nacimiento']; ?></td>
+                        <td class="text-sm"><?php echo $row['telefono']; ?></td>
+                        <td class="text-sm"><?php echo $row['correo_electronico']; ?></td>
+                        <td class="text-sm"><?php echo $row['contrasena']; ?></td>
+                        <td class="text-sm"><?php echo $row['rol']; ?></td>
+                        <td class="text-sm text-center">
+                          <button class="btn btn-primary me-2" onclick='abrirModalEditar(<?php echo json_encode($row); ?>)'>Editar</button>
+                          <button class="btn btn-danger" onclick="darDeBaja(<?php echo $row['id']; ?>)"><i class="bi bi-person-x-fill"></i></button>
+                        </td>
+                      </tr>
+                    <?php } ?>
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
-          <button class="btn btn-primary mt-5" onclick="window.location.href='https://www.ejemplo.com'"><i
+          <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#guardarAdminModal"><i
               class="bi bi-plus"></i> Nuevo Administrativo</button>
 
           <div class="card">
@@ -447,42 +419,22 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Mario</td>
-                      <td class="text-sm">Antonio</td>
-                      <td class="text-sm">Antoniasdo</td>
-                      <td class="text-sm text-center">
-
-                        <button class="btn btn-primary"
-                          onclick="window.location.href='https://www.ejemplo.com'">Editar</button>
-                        <button class="btn btn-danger" onclick="window.location.href='https://www.ejemplo.com'">Dar de
-                          baja</button>
-
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Mario</td>
-                      <td class="text-sm">Antonio</td>
-                      <td class="text-sm">Antoniasdo</td>
-                      <td class="text-sm text-center">
-
-                        <button class="btn btn-primary"
-                          onclick="window.location.href='https://www.ejemplo.com'">Editar</button>
-                        <button class="btn btn-danger" onclick="window.location.href='https://www.ejemplo.com'">Dar de
-                          baja</button>
-
-                      </td>
-                    </tr>
+                    <?php while ($row = $result3->fetch_assoc()) { ?>
+                      <tr>
+                        <td class="text-sm"><?php echo $row['id']; ?></td>
+                        <td class="text-sm"><?php echo $row['curp']; ?></td>
+                        <td class="text-sm"><?php echo $row['nombre'] . ' ' . $row['apellidos']; ?></td>
+                        <td class="text-sm"><?php echo $row['fecha_nacimiento']; ?></td>
+                        <td class="text-sm"><?php echo $row['telefono']; ?></td>
+                        <td class="text-sm"><?php echo $row['correo_electronico']; ?></td>
+                        <td class="text-sm"><?php echo $row['contrasena']; ?></td>
+                        <td class="text-sm"><?php echo $row['rol']; ?></td>
+                        <td class="text-sm text-center">
+                          <button class="btn btn-primary me-2" onclick='abrirModalEditar(<?php echo json_encode($row); ?>)'>Editar</button>
+                          <button class="btn btn-danger" onclick="darDeBaja(<?php echo $row['id']; ?>)"><i class="bi bi-person-x-fill"></i></button>
+                        </td>
+                      </tr>
+                    <?php } ?>
                   </tbody>
                 </table>
               </div>
@@ -658,66 +610,66 @@
     </div>
   </main>
   <!-- Modal Editar -->
-<div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
+  <div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
 
-      <div class="modal-header">
-        <h5 class="modal-title" id="editarModalLabel">Editar Enfermero</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
+        <div class="modal-header">
+          <h5 class="modal-title" id="editarModalLabel">Editar Personal 🧾</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
 
-      <div class="modal-body">
-        <form id="formEditar">
+        <div class="modal-body">
+          <form id="formEditar" method="post" action="actualizar_personal.php" enctype="multipart/form-data">
 
-          <div class="mb-3">
-            <label for="editId" class="form-label">ID</label>
-            <input type="text" class="form-control" id="editId" name="editId">
-          </div>
+            <div class="mb-3">
+              <label for="editId" class="form-label">ID</label>
+              <input type="text" class="form-control" id="editId" name="editId" readonly>
+            </div>
 
-          <div class="mb-3">
-            <label for="editCurp" class="form-label">CURP</label>
-            <input type="text" class="form-control" id="editCurp" name="editCurp">
-          </div>
+            <div class="mb-3">
+              <label for="editCurp" class="form-label">CURP</label>
+              <input type="text" class="form-control" id="editCurp" name="editCurp">
+            </div>
 
-          <div class="mb-3">
-            <label for="editNombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="editNombre" name="editNombre">
-          </div>
+            <div class="mb-3">
+              <label for="editNombre" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="editNombre" name="editNombre">
+            </div>
 
-          <div class="mb-3">
-            <label for="editFechaNacimiento" class="form-label">Fecha de Nacimiento</label>
-            <input type="text" class="form-control" id="editFechaNacimiento" name="editFechaNacimiento">
-          </div>
+            <div class="mb-3">
+              <label for="editFechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+              <input type="date" class="form-control" id="editFechaNacimiento" name="editFechaNacimiento">
+            </div>
 
-          <div class="mb-3">
-            <label for="editTelefono" class="form-label">Teléfono</label>
-            <input type="text" class="form-control" id="editTelefono" name="editTelefono">
-          </div>
+            <div class="mb-3">
+              <label for="editTelefono" class="form-label">Teléfono</label>
+              <input type="text" class="form-control" id="editTelefono" name="editTelefono">
+            </div>
 
-          <div class="mb-3">
-            <label for="editCorreo" class="form-label">Correo Electrónico</label>
-            <input type="email" class="form-control" id="editCorreo" name="editCorreo">
-          </div>
+            <div class="mb-3">
+              <label for="editCorreo" class="form-label">Correo Electrónico</label>
+              <input type="email" class="form-control" id="editCorreo" name="editCorreo">
+            </div>
 
-          <div class="mb-3">
-            <label for="editContrasena" class="form-label">Contraseña</label>
-            <input type="text" class="form-control" id="editContrasena" name="editContrasena">
-          </div>
+            <div class="mb-3">
+              <label for="editContrasena" class="form-label">Contraseña</label>
+              <input type="text" class="form-control" id="editContrasena" name="editContrasena">
+            </div>
 
-          
 
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
         </form>
-      </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary">Guardar Cambios</button>
       </div>
-
     </div>
   </div>
-</div>
 
   <!-- Modal Administrar Medicamento -->
   <!-- Modal -->
@@ -732,69 +684,207 @@
         </div>
 
         <div class="modal-body">
-          <form id="formEnfermero">
-
-
+          <form id="formEnfermero" method="post" action="guardar_enfermero.php" enctype="multipart/form-data">
 
             <div class="mb-3">
               <label for="curp" class="form-label">CURP</label>
-              <input type="text" class="form-control" id="curp" name="curp">
+              <input required type="text" class="form-control" id="curp" name="curp">
             </div>
 
             <div class="mb-3">
               <label for="nombre" class="form-label">Nombre</label>
-              <input type="text" class="form-control" id="nombre" name="nombre">
+              <input required type="text" class="form-control" id="nombre" name="nombre">
             </div>
 
             <div class="mb-3">
               <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
-              <input type="text" class="form-control" id="fechaNacimiento" name="fechaNacimiento">
+              <input required type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento">
             </div>
 
             <div class="mb-3">
               <label for="telefono" class="form-label">Teléfono</label>
-              <input type="text" class="form-control" id="telefono" name="telefono">
+              <input required type="text" class="form-control" id="telefono" name="telefono">
             </div>
 
             <div class="mb-3">
               <label for="correo" class="form-label">Correo Electrónico</label>
-              <input type="email" class="form-control" id="correo" name="correo">
+              <input required type="email" class="form-control" id="correo" name="correo">
             </div>
 
             <div class="mb-3">
               <label for="contrasena" class="form-label">Contraseña</label>
-              <input type="text" class="form-control" id="contrasena" name="contrasena" disabled>
+              <input required type="text" class="form-control" id="contrasena" name="contrasena" readonly>
             </div>
 
+            <div class="mb-3">
+              <label for="correo" class="form-label">Fotografía del Rostro</label>
+              <input required type="file" class="form-control" id="imgRostro" name="imgRostro">
+            </div>
 
-          </form>
         </div>
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary" onclick="guardarEnfermero()">Guardar</button>
+          <button type='submit' class="btn btn-primary">Guardar</button>
         </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="guardarMedicoModal" tabindex="-1" aria-labelledby="guardarMedicoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="guardarMedicoModalLabel">Agregar Nuevo Medico 🥼</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <form id="formMedico" method="post" action="guardar_medico.php" enctype="multipart/form-data">
+
+            <div class="mb-3">
+              <label for="curp" class="form-label">CURP</label>
+              <input required type="text" class="form-control" id="curp" name="curp">
+            </div>
+
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input required type="text" class="form-control" id="nombre" name="nombre">
+            </div>
+
+            <div class="mb-3">
+              <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+              <input required type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento">
+            </div>
+
+            <div class="mb-3">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input required type="text" class="form-control" id="telefono" name="telefono">
+            </div>
+
+            <div class="mb-3">
+              <label for="correo" class="form-label">Correo Electrónico</label>
+              <input required type="email" class="form-control" id="correo" name="correo">
+            </div>
+
+            <div class="mb-3">
+              <label for="contrasena2" class="form-label">Contraseña</label>
+              <input required type="text" class="form-control" id="contrasena2" name="contrasena2" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label for="correo" class="form-label">Fotografía del Rostro</label>
+              <input required type="file" class="form-control" id="imgRostro" name="imgRostro">
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type='submit' class="btn btn-primary">Guardar</button>
+        </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="guardarAdminModal" tabindex="-1" aria-labelledby="guardarAdminModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="guardarAdminModalLabel">Agregar Nuevo Administrativo 🥼</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <form id="formAdmin" method="post" action="guardar_admin.php" enctype="multipart/form-data">
+
+            <div class="mb-3">
+              <label for="curp" class="form-label">CURP</label>
+              <input required type="text" class="form-control" id="curp" name="curp">
+            </div>
+
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input required type="text" class="form-control" id="nombre" name="nombre">
+            </div>
+
+            <div class="mb-3">
+              <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+              <input required type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento">
+            </div>
+
+            <div class="mb-3">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input required type="text" class="form-control" id="telefono" name="telefono">
+            </div>
+
+            <div class="mb-3">
+              <label for="correo" class="form-label">Correo Electrónico</label>
+              <input required type="email" class="form-control" id="correo" name="correo">
+            </div>
+
+            <div class="mb-3">
+              <label for="contrasena3" class="form-label">Contraseña</label>
+              <input required type="text" class="form-control" id="contrasena3" name="contrasena3" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label for="correo" class="form-label">Fotografía del Rostro</label>
+              <input required type="file" class="form-control" id="imgRostro" name="imgRostro">
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type='submit' class="btn btn-primary">Guardar</button>
+        </div>
+        </form>
 
       </div>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
 
   <script>
-    function abrirModalEditar(datos) {
-    // Llenar campos con los valores que vienen de la tabla
-    document.getElementById('editId').value = datos.id;
-    document.getElementById('editCurp').value = datos.curp;
-    document.getElementById('editNombre').value = datos.nombre;
-    document.getElementById('editFechaNacimiento').value = datos.fechaNacimiento;
-    document.getElementById('editTelefono').value = datos.telefono;
-    document.getElementById('editCorreo').value = datos.correo;
-    document.getElementById('editContrasena').value = datos.contrasena;
+    function darDeBaja(id) {
+      Swal.fire({
+        title: 'Eliminar personal',
+        text: '¿Estás seguro de que deseas dar de baja al personal seleccionado?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = 'dar_de_baja.php?id=' + id;
+        }
+      });
 
-    // Mostrar el modal
-    var modal = new bootstrap.Modal(document.getElementById('editarModal'));
-    modal.show();
-  }
+    }
+ 
+    function abrirModalEditar(datos) {
+      // Llenar campos con los valores que vienen de la tabla
+      document.getElementById('editId').value = datos.id;
+      document.getElementById('editCurp').value = datos.curp;
+      document.getElementById('editNombre').value = datos.nombre;
+      document.getElementById('editFechaNacimiento').value = datos.fecha_nacimiento;
+      document.getElementById('editTelefono').value = datos.telefono;
+      document.getElementById('editCorreo').value = datos.correo_electronico;
+      document.getElementById('editContrasena').value = datos.contrasena;
+
+      // Mostrar el modal
+      var modal = new bootstrap.Modal(document.getElementById('editarModal'));
+      modal.show();
+    }
+
     function generarContrasena(longitud = 8) {
       const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       let contrasena = '';
@@ -806,26 +896,21 @@
 
     // Esta función se llama cuando se abre el modal
     var modal = document.getElementById('guardarEnfermeroModal');
-    modal.addEventListener('show.bs.modal', function () {
+    var modal2 = document.getElementById('guardarMedicoModal');
+    var modal2 = document.getElementById('guardarAdminModal');
+
+    modal.addEventListener('show.bs.modal', function() {
       // Genera y coloca la contraseña aleatoria
       document.getElementById('contrasena').value = generarContrasena();
     });
-
-    function guardarEnfermero() {
-      // Obtener datos del formulario
-      const datos = {
-        id: document.getElementById('id').value,
-        curp: document.getElementById('curp').value,
-        nombre: document.getElementById('nombre').value,
-        fechaNacimiento: document.getElementById('fechaNacimiento').value,
-        telefono: document.getElementById('telefono').value,
-        correo: document.getElementById('correo').value,
-        contrasena: document.getElementById('contrasena').value,
-      };
-
-      console.log('Datos a guardar:', datos);
-      alert('Enfermero guardado (simulación)');
-    }
+    modal2.addEventListener('show.bs.modal', function() {
+      // Genera y coloca la contraseña aleatoria
+      document.getElementById('contrasena2').value = generarContrasena();
+    });
+    modal2.addEventListener('show.bs.modal', function() {
+      // Genera y coloca la contraseña aleatoria
+      document.getElementById('contrasena3').value = generarContrasena();
+    });
   </script>
 </body>
 

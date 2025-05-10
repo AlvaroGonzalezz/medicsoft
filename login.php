@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Registro - MedicSoft</title>
+	<title>Login - MedicSoft</title>
 	<!-- Mobile Specific Metas -->
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<!-- Font-->
@@ -19,18 +19,18 @@
 	<div class="page-content">
 		
 		<div class="form-v10-content">
-			<form class="form-detail" action="#" method="post" id="myform">
+			<form class="form-detail" action="VerificarUsuario.php" method="post" id="myform">
 				
 				<div class="form-left">
 					<h2>Ingresa tu cuenta para acceder 🏥</h2>
 					<img src="imgs/publi.png" alt="">
 					<div class="form-group">
 						<div class="form-row form-row-1">
-							<input type="email" name="first_name" id="first_name" class="input-text" placeholder="Correo Electrónico" required>
+							<input type="email" name="email" id="email" class="input-text" placeholder="Correo Electrónico" required>
 						</div>
 						
 						<div class="form-row form-row-2">
-							<input type="password" name="last_name" id="last_name" class="input-text" placeholder="Contraseña" required>
+							<input type="password" name="password" id="password" class="input-text" placeholder="Contraseña" required>
 						</div>
 						
 					</div>
