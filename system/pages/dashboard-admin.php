@@ -9,6 +9,7 @@ if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Administrativo") {
 
 // Obtener el nombre desde la sesión
 $nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administración';
+$usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
 ?>
 
 <!DOCTYPE html>
@@ -34,6 +35,8 @@ $nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administraci�
   <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.1.0" rel="stylesheet" />
   <!-- Nepcha Analytics (nepcha.com) -->
   <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
 
 </head>
@@ -81,7 +84,7 @@ $nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administraci�
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/pacientes-admin.html">
+          <a class="nav-link  " href="../pages/pacientes-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-people-fill"></i>
@@ -235,16 +238,17 @@ $nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administraci�
         </div>
       </div>
     </nav>
+
     <!-- End Navbar -->
     <div class="container-fluid py-4">
-              <h4 class="mb-3">¡Hola <?php echo htmlspecialchars($nombreAdmin); ?>! 👋</h4>
+      <h4 class="mb-3">¡Hola <?php echo htmlspecialchars($nombreAdmin); ?>! 👋</h4>
 
       <div class="row">
 
         <div class="col-lg-6 col-12">
           <div class="row">
             <div class="col-lg-6 col-md-6 col-12">
-              <a class="card-green" href="pacientes-admin.html">
+              <a class="card-green" href="pacientes-admin.php">
                 <div class="card">
                   <span class="mask bg-primary opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -305,7 +309,7 @@ $nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administraci�
               </a>
             </div>
             <div class="col-lg-6 col-md-6 col-12 mt-4 mt-md-0">
-              <a href="#" onclick="darAltaPaciente(event)">
+              <a href="#" data-bs-toggle="modal" data-bs-target="#modalHospitalizar">
                 <div class="card">
                   <span class="mask bg-dark opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -335,21 +339,22 @@ $nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administraci�
           <div class="card">
             <div class="card-body p-3">
               <div class="row">
-                <div class="col-lg-6">
-                  <div class="d-flex flex-column h-100">
-                    <p class="mb-1 pt-2 text-bold">Estado Laboral</p>
-                    <div class="mb-3">
-                      <select class="form-control mt-3" id="tipoConsulta" onchange="cambiarIcono()" required>
-                        <option value="fuera" selected>Fuera de Servicio</option>
-                        <option value="en">En Servicio</option>
-                      </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Actualizar Estado</button>
+                <!-- Columna Izquierda -->
+                <div class="col-lg-6 d-flex flex-column justify-content-center">
+                  <p class="mb-1 pt-2 text-bold">Estado Laboral</p>
+                  <div class="mb-3">
+                    <select class="form-control mt-3" id="tipoConsulta" onchange="cambiarIcono()" required>
+                      <option value="fuera" selected>Fuera de Servicio</option>
+                      <option value="en">En Servicio</option>
+                    </select>
                   </div>
+                  <button type="button" class="btn btn-primary" onclick="actualizarEstado(<?= $usuarioId ?>)">Actualizar Estado</button>
+
                 </div>
 
+                <!-- Columna Derecha (Decorativa) -->
                 <div class="col-lg-5 ms-auto text-center mt-5 mt-lg-0">
-                  <div class="bg-primary border-radius-lg h-100">
+                  <div class="bg-primary border-radius-lg h-100 position-relative">
                     <img src="../assets/img/shapes/waves-white.svg"
                       class="position-absolute h-100 w-50 top-0 d-lg-block d-none" alt="waves">
                     <div class="position-relative d-flex align-items-center justify-content-center h-100">
@@ -357,13 +362,113 @@ $nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administraci�
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <div class="modal fade" id="modalHospitalizar" tabindex="-1" aria-labelledby="modalHospitalizarLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+
+            <!-- Header -->
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalHospitalizarLabel">Hospitalizar Paciente</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+
+              <div class="mb-3">
+                <label for="pacienteSelect" class="form-label">Selecciona al paciente:</label>
+                <select id="pacienteSelect" class="form-select">
+                  <option value="">--Selecciona--</option>
+                  <?php
+                  include '../../conexion.php';
+                  $consulta = "SELECT id, CONCAT(curp, ' ', nombre, ' ', apellidos) AS nombre_completo FROM usuarios WHERE hospitalizado = 0";
+                  $resultado = mysqli_query($conexion, $consulta);
+                  while ($fila = mysqli_fetch_assoc($resultado)) {
+                    echo '<option value="' . $fila['id'] . '">' . $fila['nombre_completo'] . '</option>';
+                  }
+                  ?>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="diagnostico_principal" class="form-label">Diagnóstico Principal:</label>
+                <input type="text" id="diagnostico_principal" class="form-control" placeholder="Escribe aquí..." required>
+              </div>
+
+              <div class="mb-3">
+                <label for="numero_habitacion" class="form-label">Número de Habitación:</label>
+                <input type="text" id="numero_habitacion" class="form-control" placeholder="Escribe aquí..." required>
+              </div>
+
+              <div class="mb-3">
+                <label for="estado_actual" class="form-label">Estado actual:</label>
+                <select id="estado_actual" class="form-select" required>
+                  <option value="" disabled selected>Selecciona estado</option>
+                  <option value="estable">Estable</option>
+                  <option value="critico">Crítico</option>
+                  <option value="grave">Grave</option>
+                  <option value="recuperacion">En recuperación</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="enfermeroSelect" class="form-label">Selecciona al Enfermero que le atenderá:</label>
+                <select id="enfermeroSelect" class="form-select">
+                  <option value="">--Selecciona--</option>
+                  <?php
+                  include '../../conexion.php';
+                  $consulta = "SELECT id, CONCAT(curp, ' ', nombre, ' ', apellidos) AS nombre_completo FROM usuarios WHERE rol = 'Enfermero'";
+                  $resultado = mysqli_query($conexion, $consulta);
+                  while ($fila = mysqli_fetch_assoc($resultado)) {
+                    echo '<option value="' . $fila['id'] . '">' . $fila['nombre_completo'] . '</option>';
+                  }
+                  ?>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="medicoSelect" class="form-label">Selecciona al Médico que le atenderá:</label>
+                <select id="medicoSelect" class="form-select">
+                  <option value="">--Selecciona--</option>
+                  <?php
+                  include '../../conexion.php';
+                  $consulta = "SELECT id, CONCAT(curp, ' ', nombre, ' ', apellidos) AS nombre_completo FROM usuarios WHERE rol = 'Medico'";
+                  $resultado = mysqli_query($conexion, $consulta);
+                  while ($fila = mysqli_fetch_assoc($resultado)) {
+                    echo '<option value="' . $fila['id'] . '">' . $fila['nombre_completo'] . '</option>';
+                  }
+                  ?>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="observaciones" class="form-label">Observaciones:</label>
+                <textarea id="observaciones" class="form-control" rows="2" placeholder="Escribe aquí..."></textarea>
+              </div>
+
+
+              <!-- Footer -->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="confirmarHospitalizacion()">Hospitalizar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
   </main>
+
+
+
   <!--   Core JS Files   -->
 
 
@@ -390,52 +495,57 @@ $nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administraci�
     // Ejecutar al cargar para que ya muestre el correcto según selección inicial
     cambiarIcono();
 
-    function darAltaPaciente() {
-      Swal.fire({
-        title: 'Hospitalizar Paciente',
-        html: `
-            <div style="text-align: left; margin-bottom: 10px;">
-                <label>Selecciona al paciente:</label>
-                <select id="pacienteSelect" class="swal2-input">
-                    <option value="">--Selecciona--</option>
-                    <option value="1">Juan Pérez Lopez</option>
-                </select>
-            </div>
-            <div style="text-align: left;">
-                <label>Motivo:</label>
-                <br>
-                <textarea id="observaciones" class="swal2-textarea w-80" placeholder="Escribe observaciones aquí..."></textarea>
-            </div>
-            <div style="text-align: left;">
-                <label>Observaciones:</label>
-                <br>
-                <textarea id="observaciones" class="swal2-textarea w-80" placeholder="Escribe observaciones aquí..."></textarea>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Dar de Alta',
-        cancelButtonText: 'Cancelar',
-        preConfirm: () => {
-          let pacienteId = document.getElementById('pacienteSelect').value;
-          let observaciones = document.getElementById('observaciones').value;
+    function confirmarHospitalizacion() {
+      let pacienteId = document.getElementById('pacienteSelect').value;
+      let diagnostico = document.getElementById('diagnostico_principal').value;
+      let habitacion = document.getElementById('numero_habitacion').value;
+      let estado = document.getElementById('estado_actual').value;
+      let enfermeroId = document.getElementById('enfermeroSelect').value;
+      let medicoId = document.getElementById('medicoSelect').value;
+      let observaciones = document.getElementById('observaciones').value;
 
-          if (!pacienteId) {
-            Swal.showValidationMessage('¡Debes seleccionar un paciente!');
-          } else {
-            return {
-              pacienteId: pacienteId,
-              observaciones: observaciones
-            };
-          }
-        }
+      // Validaciones simples
+      if (!pacienteId || !diagnostico || !habitacion || !estado || !enfermeroId || !medicoId) {
+        Swal.fire('Error', 'Por favor completa todos los campos obligatorios.', 'error');
+        return;
+      }
+
+      Swal.fire({
+        title: 'Hospitalizar paciente',
+        text: '¿Estás seguro de que deseas hospitalizar al paciente seleccionado?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, hospitalizar',
+        cancelButtonText: 'Cancelar'
       }).then((result) => {
         if (result.isConfirmed) {
-          let datos = result.value;
-          // Aquí puedes redirigir o enviar datos
-          window.location.href = 'darAlta.php?idPaciente=' +
-            encodeURIComponent(datos.pacienteId) +
-            '&observaciones=' +
-            encodeURIComponent(datos.observaciones);
+          // Aquí enviamos los datos usando GET en la URL (igual que darDeBaja)
+          window.location.href = 'hospitalizar.php' +
+            '?paciente=' + encodeURIComponent(pacienteId) +
+            '&diag=' + encodeURIComponent(diagnostico) +
+            '&habitacion=' + encodeURIComponent(habitacion) +
+            '&estado=' + encodeURIComponent(estado) +
+            '&enfermero=' + encodeURIComponent(enfermeroId) +
+            '&medico=' + encodeURIComponent(medicoId) +
+            '&obs=' + encodeURIComponent(observaciones);
+        }
+      });
+    }
+
+    function actualizarEstado(usuarioId) {
+      let estadoSeleccionado = document.getElementById('tipoConsulta').value;
+
+      Swal.fire({
+        title: 'Actualizar Estado Laboral',
+        text: '¿Estás seguro de que deseas actualizar el estado laboral?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Enviamos el estado y el ID del usuario por GET
+          window.location.href = 'actualizar_estado.php?estado=' + encodeURIComponent(estadoSeleccionado) + '&id=' + usuarioId;
         }
       });
     }

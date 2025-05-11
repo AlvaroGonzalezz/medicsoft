@@ -6,6 +6,8 @@ if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Administrativo") {
   header("Location: ../../index.html"); // Si no es admin, lo manda al login
   exit();
 }
+$nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administración';
+
 $sql = "SELECT id, curp, nombre, apellidos, fecha_nacimiento, telefono, correo_electronico, contrasena, rol FROM usuarios WHERE rol = 'Enfermero'";
 $result = $conexion->query($sql);
 
@@ -78,7 +80,7 @@ $result3 = $conexion->query($sql3);
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/pacientes-admin.html">
+          <a class="nav-link  " href="../pages/pacientes-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-people-fill"></i>
@@ -185,7 +187,7 @@ $result3 = $conexion->query($sql3);
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?php echo htmlspecialchars($nombreAdmin); ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -451,7 +453,7 @@ $result3 = $conexion->query($sql3);
 
           <!-- Header -->
           <div class="modal-header">
-            <h5 class="modal-title">📂Expediente Médico- Alvaro</h5>
+            <h5 class="modal-title">📂Expediente Médico</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
 
@@ -540,7 +542,7 @@ $result3 = $conexion->query($sql3);
 
           <!-- Header -->
           <div class="modal-header">
-            <h5 class="modal-title">Administrar Medicamento - Alvaro</h5>
+            <h5 class="modal-title">Administrar Medicamento </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
 

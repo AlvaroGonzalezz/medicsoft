@@ -1,3 +1,24 @@
+<?php
+session_start();
+
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Administrativo") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+include '../../conexion.php';
+// Obtener el nombre desde la sesión
+$nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administración';
+
+// Consulta a la tabla hospitalizados
+$sql = "SELECT * FROM hospitalizados";
+$resultado = $conexion->query($sql);
+
+// Consulta para pacientes NO hospitalizados
+$sql2 = "SELECT * FROM usuarios WHERE hospitalizado = 0";
+$resultado2 = $conexion->query($sql2);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -61,7 +82,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active " href="../pages/pacientes-admin.html">
+          <a class="nav-link active " href="../pages/pacientes-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-people-fill"></i>
@@ -168,7 +189,7 @@
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?php echo htmlspecialchars($nombreAdmin); ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -272,7 +293,7 @@
     <div class="container-fluid py-4">
       <div class="row">
         <div class="col-12">
-          
+
 
           <div class="card">
             <div class="card-header pb-0">
@@ -296,32 +317,20 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Mario</td>
-                      <td class="text-sm">Antonio</td>
-                      <td class="text-sm text-center">
-                       
-                        <button class="btn btn-primary" onclick="window.location.href='https://www.ejemplo.com'">Seguimiento</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Mario</td>
-                      <td class="text-sm">Antonio</td>
-                      <td class="text-sm text-center">
-                       
-                        <button class="btn btn-primary" onclick="window.location.href='https://www.ejemplo.com'">Seguimiento</button>
-                      </td>
-                    </tr>
+                    <?php while ($fila = $resultado->fetch_assoc()): ?>
+                      <tr>
+                        <td class="text-sm"><?php echo $fila['curp']; ?></td>
+                        <td class="text-sm"><?php echo $fila['nombre']; ?></td>
+                        <td class="text-sm" style="text-align: center;"><?php echo $fila['numero_habitacion']; ?></td>
+                        <td class="text-sm"><?php echo $fila['diagnostico_principal']; ?></td>
+                        <td class="text-sm"><?php echo $fila['estado_actual']; ?></td>
+                        <td class="text-sm"><?php echo $fila['enfermero_asignado']; ?></td>
+                        <td class="text-sm"><?php echo $fila['medico_asignado']; ?></td>
+                        <td class="text-sm text-center">
+                          <button class="btn btn-primary" onclick="window.location.href='seguimiento.php?id=<?php echo $fila['id']; ?>'">Seguimiento</button>
+                        </td>
+                      </tr>
+                    <?php endwhile; ?>
                   </tbody>
                 </table>
               </div>
@@ -349,34 +358,77 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm text-center">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSignosVitales">
-                          Expediente </button>
-                       
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm text-center">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSignosVitales">
-                          Expediente </button>
-                       
-                      </td>
-                    </tr>
+                    <?php while ($fila = $resultado2->fetch_assoc()):
+                      $modalId = "modalSignosVitales" . $fila['id']; // Modal único por paciente
+                    ?>
+                      <tr>
+                        <td class="text-sm"><?php echo $fila['curp']; ?></td>
+                        <td class="text-sm"><?php echo $fila['nombre']; ?></td>
+                        <td class="text-sm"><?php echo $fila['telefono']; ?></td>
+                        <td class="text-sm"><?php echo $fila['correo_electronico']; ?></td>
+                        <td class="text-sm"><?php echo $fila['fecha_nacimiento']; ?></td>
+                        <td class="text-sm"><?php echo $fila['direccion']; ?></td>
+                        <td class="text-sm"><?php echo $fila['ciudad'] . '/' . $fila['estado']; ?></td>
+                        <td class="text-sm text-center">
+                          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#<?php echo $modalId; ?>">
+                            Expediente
+                          </button>
+                        </td>
+                      </tr>
+
+                      <!-- Modal por paciente -->
+                      <div class="modal fade" id="<?php echo $modalId; ?>" tabindex="-1">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+
+                            <!-- Header -->
+                            <div class="modal-header">
+                              <h5 class="modal-title">📂 Expediente Médico </h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="modal-body">
+                              <h5 class="mb-3"><?php echo $fila['nombre']; ?></h5>
+                              <div class="foto-cuadrada mb-3">
+                                <img src="../../uploads/fotos/<?php echo $fila['fotografia_rostro']; ?>" alt="Fotografía" class="img-fluid">
+                              </div>
+                              <h5 class="mb-3">Datos Médicos 🏥</h5>
+                              <div class="mb-2"><strong>Nombre:</strong> <?php echo $fila['nombre']; ?></div>
+
+                              <div class="mb-2"><strong>Tipo de Sangre:</strong> <?php echo $fila['tipo_sangre']; ?></div>
+                              <div class="mb-2"><strong>Enfermedades Crónicas:</strong> <?php echo $fila['enfermedades_cronicas']; ?></div>
+                              <div class="mb-2"><strong>Alergias:</strong> <?php echo $fila['alergias']; ?></div>
+                              <div class="mb-2"><strong>Cirugías:</strong> <?php echo $fila['cirugias_realizadas']; ?></div>
+                              <div class="mb-2"><strong>Prohibiciones Médicas:</strong> <?php echo $fila['prohibiciones_medicas']; ?></div>
+                              <div class="mb-2"><strong>Especificaciones Médicas:</strong> <?php echo $fila['especificaciones_medicas']; ?></div>
+                              <div class="mb-2"><strong>Historial Médico:</strong> <a href="../../uploads/historiales/<?php echo $fila['historial_medico']; ?>" target="_blank">Descargar aquí</a></div>
+                              <hr>
+
+                              <h5 class="mb-3">Últimos Signos Vitales</h5>
+                              <div class="mb-2"><strong>Temperatura:</strong> <?php echo $fila['temperatura']; ?>°C</div>
+                              <div class="mb-2"><strong>Frecuencia Cardíaca:</strong> <?php echo $fila['frecuencia_cardiaca']; ?> lpm</div>
+                              <div class="mb-2"><strong>Presión Arterial:</strong> <?php echo $fila['presion_arterial']; ?></div>
+                              <div class="mb-2"><strong>Frecuencia Respiratoria:</strong> <?php echo $fila['frecuencia_respiratoria']; ?> rpm</div>
+                              <div class="mb-2"><strong>Saturación O₂:</strong> <?php echo $fila['saturacion_o2']; ?>%</div>
+
+                              <hr>
+
+
+
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="modal-footer">
+
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Regresar</button>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+
+                    <?php endwhile; ?>
                   </tbody>
                 </table>
               </div>
@@ -387,122 +439,122 @@
       </div>
     </div>
     <!-- Modal Registrar Signos Vitales -->
-<div class="modal" id="modalSignosVitales">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      
-      <!-- Header -->
-      <div class="modal-header">
-        <h5 class="modal-title">📂Expediente Médico- Alvaro</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      
-      <!-- Body -->
-      <div class="modal-body">
+    <div class="modal" id="modalSignosVitales">
+      <div class="modal-dialog">
+        <div class="modal-content">
 
-        <h5 class="mb-3">Datos Generales y Médicos</h5>
-        <div class="mb-2">
-          <strong>Nombre:</strong> Juan Pérez
-        </div>
-        <div class="mb-2">
-          <strong>Edad:</strong> 45 años
-        </div>
-        <div class="mb-2">
-          <strong>Sexo:</strong> Masculino
-        </div>
-        <div class="mb-2">
-          <strong>Tipo de Sangre:</strong> A
-        </div>
-        <div class="mb-2">
-          <strong>Diagnóstico Principal:</strong> Hipertensión arterial
-        </div>
-        <div class="mb-2">
-          <strong>Enfermedades Crónicas:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Alergias:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Cirugías:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Prohibiciones Médicas:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Especificaciones Médicas:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Historial Médico:</strong> Descargar 
-        </div>
-        <hr>
-      
-        <h5 class="mb-3">Últimos Signos Vitales</h5>
-        <div class="mb-2">
-          <strong>Temperatura:</strong> 36.7°C
-        </div>
-        <div class="mb-2">
-          <strong>Frecuencia Cardíaca:</strong> 78 lpm
-        </div>
-        <div class="mb-2">
-          <strong>Presión Arterial:</strong> 120/80 mmHg
-        </div>
-        <div class="mb-2">
-          <strong>Frecuencia Respiratoria:</strong> 18 rpm
-        </div>
-        <div class="mb-2">
-          <strong>Saturación O₂:</strong> 98%
-        </div>
-      
-        <hr>
-      
-        <h5 class="mb-3">Estudios Médicos</h5>
-        <div class="mb-2">
-          <a href="estudio1.pdf" target="_blank">Radiografía de Tórax - 01/05/2025</a>
-        </div>
-        <div class="mb-2">
-          <a href="estudio2.pdf" target="_blank">Análisis de Sangre - 28/04/2025</a>
-        </div>
-      
-      </div>
-      
-      
-      <!-- Footer -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary">💾 Guardar Registro</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-      </div>
+          <!-- Header -->
+          <div class="modal-header">
+            <h5 class="modal-title">📂Expediente Médico- Nombre Paciente</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
 
+          <!-- Body -->
+          <div class="modal-body">
+
+            <h5 class="mb-3">Datos Generales y Médicos</h5>
+            <div class="mb-2">
+              <strong>Nombre:</strong> Juan Pérez
+            </div>
+            <div class="mb-2">
+              <strong>Edad:</strong> 45 años
+            </div>
+            <div class="mb-2">
+              <strong>Sexo:</strong> Masculino
+            </div>
+            <div class="mb-2">
+              <strong>Tipo de Sangre:</strong> A
+            </div>
+            <div class="mb-2">
+              <strong>Diagnóstico Principal:</strong> Hipertensión arterial
+            </div>
+            <div class="mb-2">
+              <strong>Enfermedades Crónicas:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Alergias:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Cirugías:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Prohibiciones Médicas:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Especificaciones Médicas:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Historial Médico:</strong> Descargar
+            </div>
+            <hr>
+
+            <h5 class="mb-3">Últimos Signos Vitales</h5>
+            <div class="mb-2">
+              <strong>Temperatura:</strong> 36.7°C
+            </div>
+            <div class="mb-2">
+              <strong>Frecuencia Cardíaca:</strong> 78 lpm
+            </div>
+            <div class="mb-2">
+              <strong>Presión Arterial:</strong> 120/80 mmHg
+            </div>
+            <div class="mb-2">
+              <strong>Frecuencia Respiratoria:</strong> 18 rpm
+            </div>
+            <div class="mb-2">
+              <strong>Saturación O₂:</strong> 98%
+            </div>
+
+            <hr>
+
+            <h5 class="mb-3">Estudios Médicos</h5>
+            <div class="mb-2">
+              <a href="estudio1.pdf" target="_blank">Radiografía de Tórax - 01/05/2025</a>
+            </div>
+            <div class="mb-2">
+              <a href="estudio2.pdf" target="_blank">Análisis de Sangre - 28/04/2025</a>
+            </div>
+
+          </div>
+
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">💾 Guardar Registro</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
     <div class="modal" id="modalMedicamento">
       <div class="modal-dialog">
         <div class="modal-content">
-          
+
           <!-- Header -->
           <div class="modal-header">
             <h5 class="modal-title">Administrar Medicamento - Alvaro</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-          
+
           <!-- Body -->
           <div class="modal-body">
             <form id="formMedicamento">
-              
-              
-    
+
+
+
               <div class="mb-3">
                 <label>Medicamento</label>
                 <input type="text" class="form-control" name="medicamento">
 
               </div>
-    
+
               <div class="mb-3">
                 <label>Dosis / Cantidad </label>
                 <input type="text" class="form-control" name="dosis">
               </div>
-    
+
               <div class="mb-3">
                 <label>Vía de Administración</label>
                 <select class="form-control" name="via">
@@ -527,26 +579,26 @@
                   <option value="24hr">24 horas</option>
                 </select>
               </div>
-              
+
               <div class="mb-3">
                 <label>Hora Programada</label>
                 <input type="time" class="form-control" name="horaProgramada">
               </div>
-    
+
               <div class="mb-3">
                 <label>Observaciones / Reacciones</label>
                 <textarea class="form-control" name="observaciones"></textarea>
               </div>
-    
+
             </form>
           </div>
-          
+
           <!-- Footer -->
           <div class="modal-footer">
             <button type="button" class="btn btn-primary">Confirmar Administración</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           </div>
-    
+
         </div>
       </div>
     </div>
