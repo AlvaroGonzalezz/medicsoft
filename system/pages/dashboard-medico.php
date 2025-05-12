@@ -1,3 +1,27 @@
+<?php
+session_start();
+
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Medico") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+include '../../conexion.php';
+
+// Obtener el nombre desde la sesión
+$nombreMedico = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Médico';
+$usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
+
+// Consulta para obtener el estado laboral
+$sql = "SELECT estado_laboral FROM usuarios WHERE id = $usuarioId";
+$result = $conexion->query($sql);
+
+$estadoLaboral = 'fuera'; // Valor por defecto
+if ($result && $row = $result->fetch_assoc()) {
+  $estadoLaboral = $row['estado_laboral']; // Este valor debe ser 'en' o 'fuera'
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -32,7 +56,7 @@
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -42,7 +66,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link  active" href="../pages/dashboard-medico.html">
+          <a class="nav-link  active" href="../pages/dashboard-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +92,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/pacientes-medico.html">
+          <a class="nav-link  " href="../pages/pacientes-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-people-fill"></i>
@@ -77,7 +101,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/estudios-medicos.html">
+          <a class="nav-link  " href="../pages/estudios-medicos.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
@@ -112,7 +136,7 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile-medico.html">
+          <a class="nav-link  " href="../pages/profile-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +200,7 @@
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?php echo htmlspecialchars($nombreMedico); ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -224,11 +248,13 @@
     </nav>
     <!-- End Navbar -->
     <div class="container-fluid py-4">
+      <h4 class="mb-3">¡Hola <?php echo htmlspecialchars($nombreMedico); ?>! 👋</h4>
+
       <div class="row">
         <div class="col-lg-6 col-12">
           <div class="row">
             <div class="col-lg-6 col-md-6 col-12">
-              <a class="card-green" href="pacientes-medico.html">
+              <a class="card-green" href="pacientes-medico.php">
                 <div class="card">
                   <span class="mask bg-primary opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -248,7 +274,7 @@
               </a>
             </div>
             <div class="col-lg-6 col-md-6 col-12 mt-4 mt-md-0">
-              <a href="profile-medico.html">
+              <a href="profile-medico.php">
                 <div class="card">
                   <span class="mask bg-dark opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -270,7 +296,7 @@
           </div>
           <div class="row mt-4">
             <div class="col-lg-6 col-md-6 col-12">
-              <a href="estudios-medicos.html">
+              <a href="estudios-medicos.php">
                 <div class="card">
                   <span class="mask bg-dark opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -319,17 +345,15 @@
           <div class="card">
             <div class="card-body p-3">
               <div class="row">
-                <div class="col-lg-6">
-                  <div class="d-flex flex-column h-100">
-                    <p class="mb-1 pt-2 text-bold">Estado Laboral</p>
-                    <div class="mb-3">
-                      <select class="form-control mt-3" id="tipoConsulta" onchange="cambiarIcono()" required>
-                        <option value="fuera" selected>Fuera de Servicio</option>
-                        <option value="en">En Servicio</option>
-                      </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Actualizar Estado</button>
+                <div class="col-lg-6 d-flex flex-column justify-content-center">
+                  <p class="mb-1 pt-2 text-bold">Estado Laboral</p>
+                  <div class="mb-3">
+                    <select class="form-control mt-3" id="tipoConsulta" onchange="cambiarIcono()" required>
+                      <option value="fuera" <?= $estadoLaboral == 'fuera' ? 'selected' : '' ?>>Fuera de Servicio</option>
+                      <option value="en" <?= $estadoLaboral == 'en' ? 'selected' : '' ?>>En Servicio</option>
+                    </select>
                   </div>
+                  <button type="button" class="btn btn-primary" onclick="actualizarEstado(<?= $usuarioId ?>)">Actualizar Estado</button>
                 </div>
 
                 <div class="col-lg-5 ms-auto text-center mt-5 mt-lg-0">
@@ -373,17 +397,41 @@
 
     // Ejecutar al cargar para que ya muestre el correcto según selección inicial
     cambiarIcono();
+
+    function actualizarEstado(usuarioId) {
+      let estadoSeleccionado = document.getElementById('tipoConsulta').value;
+
+      Swal.fire({
+        title: 'Actualizar Estado Laboral',
+        text: '¿Estás seguro de que deseas actualizar el estado laboral?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Enviamos el estado y el ID del usuario por GET
+          window.location.href = 'actualizar_estado.php?estado=' + encodeURIComponent(estadoSeleccionado) + '&id=' + usuarioId;
+        }
+      });
+    }
+
     function darAltaPaciente() {
       Swal.fire({
         title: 'Dar de Alta Paciente',
         html: `
             <div style="text-align: left; margin-bottom: 10px;">
                 <label>Selecciona al paciente:</label>
-                <select id="pacienteSelect" class="swal2-input">
-                    <option value="">--Selecciona--</option>
-                    <option value="1">Juan Pérez - Habitación 203</option>
-                    <option value="2">María López - Habitación 101</option>
-                    <option value="3">Carlos Sánchez - Habitación 305</option>
+               <select id="pacienteSelect" class="form-select">
+                  <option value="">--Selecciona--</option>
+                  <?php
+                  include '../../conexion.php';
+                  $consulta = "SELECT id, CONCAT(curp, ' ', nombre, ' ', apellidos) AS nombre_completo FROM usuarios WHERE hospitalizado = 1 AND rol = 'Paciente'";
+                  $resultado = mysqli_query($conexion, $consulta);
+                  while ($fila = mysqli_fetch_assoc($resultado)) {
+                    echo '<option value="' . $fila['id'] . '">' . $fila['nombre_completo'] . '</option>';
+                  }
+                  ?>
                 </select>
             </div>
             <div style="text-align: left;">
@@ -402,24 +450,40 @@
           if (!pacienteId) {
             Swal.showValidationMessage('¡Debes seleccionar un paciente!');
           } else {
-            return { pacienteId: pacienteId, observaciones: observaciones };
+            return {
+              pacienteId: pacienteId,
+              observaciones: observaciones
+            };
           }
         }
       }).then((result) => {
         if (result.isConfirmed) {
           let datos = result.value;
           // Aquí puedes redirigir o enviar datos
-          window.location.href = 'darAlta.php?idPaciente='
-            + encodeURIComponent(datos.pacienteId)
-            + '&observaciones='
-            + encodeURIComponent(datos.observaciones);
+          window.location.href = 'darAlta.php?idPaciente=' +
+            encodeURIComponent(datos.pacienteId) +
+            '&observaciones=' +
+            encodeURIComponent(datos.observaciones) 
+            + '&idMedico=' +
+            encodeURIComponent(<?= $usuarioId ?>);
         }
       });
     }
-
-
-
-
+    function confirmarCerrarSesion(e) {
+      e.preventDefault(); // Evita que el enlace se ejecute directo
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Se cerrará tu sesión actual',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '../pages/cerrar_sesion.php';
+        }
+      });
+    }
   </script>
   <script>
     var ctx = document.getElementById("chart-bars").getContext("2d");
@@ -437,7 +501,7 @@
           backgroundColor: "#fff",
           data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
           maxBarThickness: 6
-        },],
+        }, ],
       },
       options: {
         responsive: true,
@@ -508,30 +572,30 @@
       data: {
         labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
         datasets: [{
-          label: "Mobile apps",
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-          maxBarThickness: 6
+            label: "Mobile apps",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#cb0c9f",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+            maxBarThickness: 6
 
-        },
-        {
-          label: "Websites",
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#3A416F",
-          borderWidth: 3,
-          backgroundColor: gradientStroke2,
-          fill: true,
-          data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
-          maxBarThickness: 6
-        },
+          },
+          {
+            label: "Websites",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#3A416F",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
+            maxBarThickness: 6
+          },
         ],
       },
       options: {
@@ -591,8 +655,10 @@
       },
     });
   </script>
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
+  <script
+
+    var win=navigator.platform.indexOf('Win')>
+    -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
       var options = {
         damping: '0.5'

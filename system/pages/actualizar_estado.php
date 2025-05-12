@@ -26,7 +26,7 @@ if (isset($_GET['estado']) && isset($_GET['id'])) {
                 confirmButtonText: 'Aceptar'
             }).then((result) => {
                 if (result.isConfirmed || result.dismiss) {
-                    window.location.href = 'dashboard-admin.php';
+                    window.history.back();
                 }
             });
         });

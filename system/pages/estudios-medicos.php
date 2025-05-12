@@ -1,3 +1,20 @@
+<?php
+session_start();
+
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Medico") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+include '../../conexion.php';
+
+// Obtener el nombre desde la sesión
+$nombreMedico = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Médico';
+$usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
+
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,8 +23,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/icon.png">
+  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
   <title>
-    Mis Pacientes - MedicSoft
+    Estudios Médicos - MedicSoft
   </title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -25,7 +43,7 @@
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -35,7 +53,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/dashboard-medico.html">
+          <a class="nav-link  " href="../pages/dashboard-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +79,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  active" href="../pages/pacientes-medico.html">
+          <a class="nav-link  " href="../pages/pacientes-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-people-fill"></i>
@@ -70,14 +88,15 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/estudios-medicos.html">
+          <a class="nav-link  active" href="../pages/estudios-medicos.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>            </div>
+              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
+            </div>
             <span class="nav-link-text ms-1">Estudios Médicos</span>
           </a>
         </li>
-       
+
         <!-- <li class="nav-item">
           <a class="nav-link  " href="../pages/virtual-reality.html">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -104,7 +123,7 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile-medico.html">
+          <a class="nav-link  " href="../pages/profile-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -133,7 +152,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/cerrar_sesion.php">
+          <a class="nav-link" href="#" onclick="confirmarCerrarSesion(event)">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
@@ -151,9 +170,9 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Página</a></li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Mis Pacientes</li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Estudios Médicos</li>
           </ol>
-          <h6 class="font-weight-bolder mb-0">Mis Pacientes</h6>
+          <h6 class="font-weight-bolder mb-0">Estudios Médicos</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -167,7 +186,7 @@
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?= $nombreMedico ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -271,60 +290,82 @@
     <div class="container-fluid py-4">
       <div class="row">
         <div class="col-12">
-          
 
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSignosVitales">
+            <i class="bi bi-file-earmark-medical-fill me-2"></i> Nuevo Estudio Médico </button>
           <div class="card">
             <div class="card-header pb-0">
-              <h6>Mis Pacientes</h6>
+              <h6>Estudios Médicos</h6>
             </div>
             <div class="card-body px-4 pt-0 pb-2">
               <div class="table-responsive">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CURP</th>
+                <?php
 
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nº Habitación</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Diagnóstico Principal</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Estado Actual</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="text-sm">124</td>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm text-center">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSignosVitales">
-                          Expediente </button>
-                          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMedicamento">
-                            Administrar Medicamento</button>
-                        <button class="btn btn-primary" onclick="window.location.href='https://www.ejemplo.com'">Seguimiento</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="text-sm">124</td>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm" style="text-align: center;">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm text-center">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSignosVitales">Expediente</button>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMedicamento">
-                          Administrar Medicamento</button>
-                        <button class="btn btn-primary">Seguimiento</button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                $sql = "SELECT 
+    estudios_medicos.id AS id, 
+    estudios_medicos.tipo_estudio as tipo_estudio,
+    estudios_medicos.fecha_estudio,
+        estudios_medicos.archivo,
+    estudios_medicos.observaciones,
+    usuarios.curp AS curp_paciente,
+    usuarios.nombre AS nombre_completo
+FROM estudios_medicos
+JOIN usuarios ON estudios_medicos.id_paciente = usuarios.id";
+
+
+
+
+                $result = $conexion->query($sql); // Ejecutar la consulta
+
+                if ($result->num_rows > 0) {
+                  // Iniciar la tabla HTML
+                  echo '<table class="table align-items-center mb-0">
+            <thead>
+                <tr>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tipo</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CURP</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observaciones</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
+
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción</th>
+                </tr>
+            </thead>
+            <tbody>';
+
+                  // Mostrar los datos de cada row en la tabla
+                  while ($row = $result->fetch_assoc()) {
+                    echo '<tr>';
+                    echo '<td class="text-sm">' . $row['id'] . '</td>';
+                    echo '<td class="text-sm">' . $row['tipo_estudio'] . '</td>';
+                    echo '<td class="text-sm">' . $row['curp_paciente'] . '</td>';
+                    echo '<td class="text-sm">' . $row['nombre_completo'] . '</td>';
+                    echo '<td class="text-sm">' . $row['observaciones'] . '</td>';
+                    echo '<td class="text-sm">' . $row['fecha_estudio'] . '</td>';
+
+                    echo '<td class="text-sm text-center">
+  <a href="' . $row['archivo'] . '" class="btn btn-primary" download>
+    Descargar
+  </a>
+  <button type="button" class="btn btn-danger" onclick="eliminarEstudio(' . $row['id'] . ')">
+    Eliminar
+  </button>
+</td>';
+
+
+                    echo '</tr>';
+                  }
+
+                  // Cerrar la tabla
+                  echo '</tbody></table>';
+                } else {
+                  echo '<p>No se encontraron estudios.</p>';
+                }
+
+                $conexion->close(); // Cerrar la conexión
+                ?>
+
               </div>
             </div>
           </div>
@@ -334,122 +375,101 @@
       </div>
     </div>
     <!-- Modal Registrar Signos Vitales -->
-<div class="modal" id="modalSignosVitales">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      
-      <!-- Header -->
-      <div class="modal-header">
-        <h5 class="modal-title">📂Expediente Médico- Alvaro</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      
-      <!-- Body -->
-      <div class="modal-body">
+    <div class="modal" id="modalSignosVitales">
+      <div class="modal-dialog">
+        <div class="modal-content">
 
-        <h5 class="mb-3">Datos Generales y Médicos</h5>
-        <div class="mb-2">
-          <strong>Nombre:</strong> Juan Pérez
-        </div>
-        <div class="mb-2">
-          <strong>Edad:</strong> 45 años
-        </div>
-        <div class="mb-2">
-          <strong>Sexo:</strong> Masculino
-        </div>
-        <div class="mb-2">
-          <strong>Tipo de Sangre:</strong> A
-        </div>
-        <div class="mb-2">
-          <strong>Diagnóstico Principal:</strong> Hipertensión arterial
-        </div>
-        <div class="mb-2">
-          <strong>Enfermedades Crónicas:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Alergias:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Cirugías:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Prohibiciones Médicas:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Especificaciones Médicas:</strong> Hipertensión 
-        </div>
-        <div class="mb-2">
-          <strong>Historial Médico:</strong> Descargar 
-        </div>
-        <hr>
-      
-        <h5 class="mb-3">Últimos Signos Vitales</h5>
-        <div class="mb-2">
-          <strong>Temperatura:</strong> 36.7°C
-        </div>
-        <div class="mb-2">
-          <strong>Frecuencia Cardíaca:</strong> 78 lpm
-        </div>
-        <div class="mb-2">
-          <strong>Presión Arterial:</strong> 120/80 mmHg
-        </div>
-        <div class="mb-2">
-          <strong>Frecuencia Respiratoria:</strong> 18 rpm
-        </div>
-        <div class="mb-2">
-          <strong>Saturación O₂:</strong> 98%
-        </div>
-      
-        <hr>
-      
-        <h5 class="mb-3">Estudios Médicos</h5>
-        <div class="mb-2">
-          <a href="estudio1.pdf" target="_blank">Radiografía de Tórax - 01/05/2025</a>
-        </div>
-        <div class="mb-2">
-          <a href="estudio2.pdf" target="_blank">Análisis de Sangre - 28/04/2025</a>
-        </div>
-      
-      </div>
-      
-      
-      <!-- Footer -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary">💾 Guardar Registro</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-      </div>
+          <!-- Header -->
+          <div class="modal-header">
+            <h5 class="modal-title">🏥 Nuevo Estudio Médico</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
 
+          <!-- Body -->
+          <div class="modal-body">
+            <form id="formNuevoEstudio" method="POST" enctype="multipart/form-data">
+              <div class="mb-3">
+                <label>Tipo de Estudio</label>
+                <select class="form-control" name="tipoEstudio" required>
+                  <option value="">Selecciona...</option>
+                  <option value="Radiografía">Radiografía</option>
+                  <option value="Ultrasonido">Ultrasonido</option>
+                  <option value="Laboratorio">Análisis de Laboratorio</option>
+                  <option value="Resonancia">Resonancia Magnética</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="pacienteSelect" class="form-label">Selecciona al paciente:</label>
+                <select id="pacienteSelect" class="form-select">
+                  <option value="">--Selecciona--</option>
+                  <?php
+                  include '../../conexion.php';
+                  $consulta = "SELECT id, CONCAT(curp, ' ', nombre, ' ', apellidos) AS nombre_completo FROM usuarios WHERE hospitalizado = 0 AND rol = 'Paciente'";
+                  $resultado = mysqli_query($conexion, $consulta);
+                  while ($row = mysqli_fetch_assoc($resultado)) {
+                    echo '<option value="' . $row['id'] . '">' . $row['nombre_completo'] . '</option>';
+                  }
+                  ?>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label>Fecha del Estudio</label>
+                <input type="date" class="form-control" name="fechaEstudio" required>
+              </div>
+
+              <div class="mb-3">
+                <label>Subir Archivo</label>
+                <input type="file" class="form-control" name="archivoEstudio" accept=".pdf,.jpg,.png,.jpeg" required>
+                <small class="text-muted">Formatos permitidos: PDF, JPG, PNG</small>
+              </div>
+
+              <div class="mb-3">
+                <label>Observaciones</label>
+                <textarea class="form-control" name="observaciones" rows="3"></textarea>
+              </div>
+              <!-- Footer -->
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary"> Subir </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+
+
+
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
     <div class="modal" id="modalMedicamento">
       <div class="modal-dialog">
         <div class="modal-content">
-          
+
           <!-- Header -->
           <div class="modal-header">
-            <h5 class="modal-title">Administrar Medicamento - Alvaro</h5>
+            <h5 class="modal-title">Administrar Medicamento - <?= $nombreMedico ?></h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-          
+
           <!-- Body -->
           <div class="modal-body">
-            <form id="formMedicamento">
-              
-              
-    
+            <form id="formNuevoEstudio" method="POST" enctype="multipart/form-data">
+
+
+
               <div class="mb-3">
                 <label>Medicamento</label>
                 <input type="text" class="form-control" name="medicamento">
 
               </div>
-    
+
               <div class="mb-3">
                 <label>Dosis / Cantidad </label>
                 <input type="text" class="form-control" name="dosis">
               </div>
-    
+
               <div class="mb-3">
                 <label>Vía de Administración</label>
                 <select class="form-control" name="via">
@@ -474,26 +494,26 @@
                   <option value="24hr">24 horas</option>
                 </select>
               </div>
-              
+
               <div class="mb-3">
                 <label>Hora Programada</label>
                 <input type="time" class="form-control" name="horaProgramada">
               </div>
-    
+
               <div class="mb-3">
                 <label>Observaciones / Reacciones</label>
                 <textarea class="form-control" name="observaciones"></textarea>
               </div>
-    
+
             </form>
           </div>
-          
+
           <!-- Footer -->
           <div class="modal-footer">
             <button type="button" class="btn btn-primary">Confirmar Administración</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           </div>
-    
+
         </div>
       </div>
     </div>
@@ -501,7 +521,112 @@
   <!-- Modal Administrar Medicamento -->
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function eliminarEstudio(id) {
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: "No podrás revertir esto",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminarlo'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Llamada AJAX para eliminar
+          fetch('eliminar_estudio.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: 'id=' + id
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.status === 'ok') {
+                Swal.fire(
+                  'Eliminado!',
+                  data.msg,
+                  'success'
+                ).then(() => location.reload());
+              } else {
+                Swal.fire('Error', data.msg, 'error');
+              }
+            });
+        }
+      });
+    }
+    document.getElementById('formNuevoEstudio').addEventListener('submit', function(e) {
+      e.preventDefault();
 
+      // Captura los valores del formulario
+      let tipoEstudio = document.querySelector('select[name="tipoEstudio"]').value;
+      let fechaEstudio = document.querySelector('input[name="fechaEstudio"]').value;
+      let observaciones = document.querySelector('textarea[name="observaciones"]').value;
+      let archivo = document.querySelector('input[name="archivoEstudio"]').files[0]; // archivo seleccionado
+      let idPaciente = document.getElementById('pacienteSelect').value; // ID del paciente seleccionado
+
+      let formData = new FormData();
+      formData.append('tipoEstudio', tipoEstudio);
+      formData.append('fechaEstudio', fechaEstudio);
+      formData.append('observaciones', observaciones);
+      formData.append('archivoEstudio', archivo); // 👈 El archivo (PDF, JPG, etc.)
+      formData.append('idPaciente', idPaciente); // 👈 El ID del paciente
+
+      fetch('guardarEstudio.php', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json()) // Parseamos la respuesta JSON
+        .then(data => {
+          if (data.status === 'ok') {
+            // Si la respuesta es exitosa, mostramos el mensaje de éxito
+            Swal.fire({
+              title: 'Éxito',
+              text: data.msg,
+              icon: 'success',
+              confirmButtonText: 'Aceptar'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                location.reload(); // Recargamos la página para actualizar la lista
+              }
+            });
+          } else {
+            // Si la respuesta tiene un estado de error, mostramos el mensaje de error
+            Swal.fire({
+              title: 'Error',
+              text: data.msg,
+              icon: 'error',
+              confirmButtonText: 'Aceptar'
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema con la solicitud.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+          });
+        });
+    });
+    function confirmarCerrarSesion(e) {
+      e.preventDefault(); // Evita que el enlace se ejecute directo
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Se cerrará tu sesión actual',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '../pages/cerrar_sesion.php';
+        }
+      });
+    }
+  </script>
 </body>
 
 </html>

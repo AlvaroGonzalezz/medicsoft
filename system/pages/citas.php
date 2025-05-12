@@ -1,4 +1,19 @@
+<?php
+session_start();
 
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Paciente") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+
+// Obtener el nombre desde la sesión
+$nombrePaciente = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Paciente';
+$curpPaciente = isset($_SESSION['curp']) ? $_SESSION['curp'] : '';
+$telefonoPaciente = isset($_SESSION['telefono']) ? $_SESSION['telefono'] : '';
+$correo_electronicoPaciente = isset($_SESSION['email']) ? $_SESSION['email'] : '';
+$idPaciente = isset($_SESSION['id']) ? $_SESSION['id'] : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,21 +23,14 @@
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/icon.png">
   <title>
-    Mi Información - MedicSoft
+    Agendar Cita - MedicSoft
   </title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
-  <!-- Nucleo Icons -->
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-svg.css" rel="stylesheet" />
-  <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <!-- CSS Files -->
   <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.1.0" rel="stylesheet" />
-  <!-- Nepcha Analytics (nepcha.com) -->
-  <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
-  <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -31,7 +39,7 @@
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -41,7 +49,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="../pages/dashboard.html">
+          <a class="nav-link  " href="../pages/dashboard.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +75,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link " href="../pages/citas.html">
+          <a class="nav-link active " href="../pages/citas.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-calendar-event-fill"></i>
@@ -76,18 +84,20 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link " href="../pages/seguimiento.html">
+          <a class="nav-link " href="../pages/seguimiento.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>            </div>
+              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
+            </div>
             <span class="nav-link-text ms-1">Seguimiento Hospitalario</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="../pages/resultados-medicos.html">
+          <a class="nav-link" href="../pages/resultados-medicos.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-folder-fill"></i>            </div>
+              <i style="color: #181818;" class="bi bi-folder-fill"></i>
+            </div>
             <span class="nav-link-text ms-1">Resultados Médicos</span>
           </a>
         </li>
@@ -117,7 +127,7 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  active" href="../pages/profile.html">
+          <a class="nav-link  " href="../pages/profile.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -157,61 +167,61 @@
       </ul>
     </div>
   </aside>
-  <div class="main-content position-relative max-height-vh-100 h-100">
-    <!-- Navbar -->
-    <nav class="navbar navbar-main navbar-expand-lg bg-transparent shadow-none position-absolute px-4 w-100 z-index-2">
-      <div class="container-fluid py-1">
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
+      navbar-scroll="true">
+      <div class="container-fluid py-1 px-3">
         <nav aria-label="breadcrumb">
-          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 ps-2 me-sm-6 me-5">
-            <li class="breadcrumb-item text-sm"><a class="text-white opacity-5" href="javascript:;">Página</a></li>
-            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Mi Información</li>
+          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Página</a></li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Citas</li>
           </ol>
-          <h6 class="text-white font-weight-bolder ms-2">Mi Información</h6>
+          <h6 class="font-weight-bolder mb-0">Citas</h6>
         </nav>
-        <div class="collapse navbar-collapse me-md-0 me-sm-4 mt-sm-0 mt-2" id="navbar">
+        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-            
+            <div class="input-group">
+              <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
+              <input type="text" class="form-control" placeholder="Buscar..">
+            </div>
           </div>
-          <ul class="navbar-nav justify-content-end">
-            
+          <ul class="navbar-nav  justify-content-end">
+
             <li class="nav-item d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
+              <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?= $nombrePaciente ?></span>
               </a>
             </li>
-            <li class="nav-item d-xl-none ps-3 pe-0 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-white p-0">
-                <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
-                  <div class="sidenav-toggler-inner">
-                    <i class="sidenav-toggler-line bg-white"></i>
-                    <i class="sidenav-toggler-line bg-white"></i>
-                    <i class="sidenav-toggler-line bg-white"></i>
-                  </div>
-                </a>
+            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
+                <div class="sidenav-toggler-inner">
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                </div>
               </a>
             </li>
             <li class="nav-item px-3 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-white p-0">
-                <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
-              </a>
+
             </li>
             <li class="nav-item dropdown pe-2 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+              <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 <i class="fa fa-bell cursor-pointer"></i>
               </a>
-              <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-n4" aria-labelledby="dropdownMenuButton">
+              <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
                 <li class="mb-2">
                   <a class="dropdown-item border-radius-md" href="javascript:;">
                     <div class="d-flex py-1">
                       <div class="my-auto">
-                        <img src="../assets/img/team-2.jpg" class="avatar avatar-sm me-3">
+                        <img src="../assets/img/team-2.jpg" class="avatar avatar-sm  me-3 ">
                       </div>
                       <div class="d-flex flex-column justify-content-center">
                         <h6 class="text-sm font-weight-normal mb-1">
                           <span class="font-weight-bold">New message</span> from Laur
                         </h6>
-                        <p class="text-xs text-secondary mb-0">
+                        <p class="text-xs text-secondary mb-0 ">
                           <i class="fa fa-clock me-1"></i>
                           13 minutes ago
                         </p>
@@ -223,13 +233,14 @@
                   <a class="dropdown-item border-radius-md" href="javascript:;">
                     <div class="d-flex py-1">
                       <div class="my-auto">
-                        <img src="../assets/img/small-logos/logo-spotify.svg" class="avatar avatar-sm bg-gradient-dark me-3">
+                        <img src="../assets/img/small-logos/logo-spotify.svg"
+                          class="avatar avatar-sm bg-gradient-dark  me-3 ">
                       </div>
                       <div class="d-flex flex-column justify-content-center">
                         <h6 class="text-sm font-weight-normal mb-1">
                           <span class="font-weight-bold">New album</span> by Travis Scott
                         </h6>
-                        <p class="text-xs text-secondary mb-0">
+                        <p class="text-xs text-secondary mb-0 ">
                           <i class="fa fa-clock me-1"></i>
                           1 day
                         </p>
@@ -240,15 +251,20 @@
                 <li>
                   <a class="dropdown-item border-radius-md" href="javascript:;">
                     <div class="d-flex py-1">
-                      <div class="avatar avatar-sm bg-gradient-secondary me-3 my-auto">
-                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                      <div class="avatar avatar-sm bg-gradient-secondary  me-3  my-auto">
+                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1"
+                          xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                           <title>credit-card</title>
                           <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                             <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF" fill-rule="nonzero">
                               <g transform="translate(1716.000000, 291.000000)">
                                 <g transform="translate(453.000000, 454.000000)">
-                                  <path class="color-background" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" opacity="0.593633743"></path>
-                                  <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z"></path>
+                                  <path class="color-background"
+                                    d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z"
+                                    opacity="0.593633743"></path>
+                                  <path class="color-background"
+                                    d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z">
+                                  </path>
                                 </g>
                               </g>
                             </g>
@@ -259,7 +275,7 @@
                         <h6 class="text-sm font-weight-normal mb-1">
                           Payment successfully completed
                         </h6>
-                        <p class="text-xs text-secondary mb-0">
+                        <p class="text-xs text-secondary mb-0 ">
                           <i class="fa fa-clock me-1"></i>
                           2 days
                         </p>
@@ -273,164 +289,183 @@
         </div>
       </div>
     </nav>
-    <!-- End Navbar -->
-    <div class="container-fluid">
-      <div class="page-header min-height-250 border-radius-lg mt-4 d-flex flex-column justify-content-end">
-        <span class="mask bg-primary opacity-9"></span>
-        <div class="w-100 position-relative p-3">
-          <div class="d-flex justify-content-between align-items-end">
-            <div class="d-flex align-items-center">
-              <div class="avatar avatar-xl position-relative me-3">
-                <img src="../assets/img/bruce-mars.jpg" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
-              </div>
-              <div>
-                <h5 class="mb-1 text-white font-weight-bolder">
-                  Alvaro Sánchez Glz
-                </h5>
-                <p class="mb-0 text-white text-sm">
-                  SAGA21312313
-                </p>
-              </div>
-            </div>
-            
-          </div>
-        </div>
-      </div>
-    </div>
+
+    <!-- Contenido principal -->
     <div class="container-fluid py-4">
       <div class="row">
-        <div class="col-12 col-xl-4">
-          <div class="card h-100">
-           
-            <div class="card-body p-3">
-              
-              <ul class="list-group mb-4">
-                <li class="list-group-item active">Información General 📝</li>
-                <li class="list-group-item">
-                  <strong>Nombre(s):</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Nombre(s)" value="Alec">
-                </li>
-                <li class="list-group-item">
-                  <strong>Apellidos:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Apellidos" value="Thompson">
-                </li>
-                <li class="list-group-item">
-                  <strong>CURP:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="CURP" value="XXXX000000HDFXXX00">
-                </li>
-                <li class="list-group-item">
-                  <strong>Teléfono:</strong>
-                  <input type="tel" class="form-control form-control-sm mt-1" placeholder="Teléfono" value="(44) 123 1234 123">
-                </li>
-                <li class="list-group-item">
-                  <strong>Fecha de Nacimiento:</strong>
-                  <input type="date" class="form-control form-control-sm mt-1" value="1990-01-01">
-                </li>
-                <li class="list-group-item">
-                  <strong>Dirección:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Dirección" value="123 Main St">
-                </li>
-                <li class="list-group-item">
-                  <strong>Ciudad:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Ciudad" value="Ciudad de México">
-                </li>
-                <li class="list-group-item">
-                  <strong>Estado:</strong>
-                  <select class="form-control form-control-sm mt-1">
-                    <option selected>CDMX</option>
-                    <option>Jalisco</option>
-                    <option>Nuevo León</option>
-                    <!-- Agrega más estados -->
-                  </select>
-                </li>
-                <li class="list-group-item">
-                  <strong>Correo Electrónico:</strong>
-                  <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="alecthompson@mail.com">
-                </li>
-              </ul>
-              <div class="text-end">
-                <button class="btn btn-primary btn-sm rounded-pill px-4">
-                  Actualizar Información
-                </button>
+        <div class="col-12">
+          <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h5>Agendar Cita Médica</h5>
+            </div>
+            <div class="card-body px-4 pt-0 pb-2">
+              <form action="agendar_cita.php" method="post">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombre" class="form-label">Nombre Completo del Paciente</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo $nombrePaciente ?>" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="curp" class="form-label">CURP</label>
+                    <input type="text" class="form-control" id="curp" name="curp" value="<?php echo $curpPaciente ?>" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="tipoConsulta" class="form-label">Tipo de Consulta</label>
+                    <select class="form-control" id="tipoConsulta" name="tipoConsulta" required>
+                      <option value="" disabled selected>Selecciona una opción</option>
+                      <option value="medicina_general">Medicina General</option>
+                      <option value="pediatria">Pediatría</option>
+                      <option value="ginecologia">Ginecología</option>
+                      <option value="dermatologia">Dermatología</option>
+                      <option value="odontologia">Odontología</option>
+                      <option value="psicologia">Psicología</option>
+                      <option value="nutricion">Nutrición</option>
+                      <option value="oftalmologia">Oftalmología</option>
+                      <option value="cardiologia">Cardiología</option>
+                      <option value="traumatologia">Traumatología</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="correo" class="form-label">Correo Electrónico</label>
+                    <input type="email" class="form-control" id="correo" name="correo" value="<?php echo $correo_electronicoPaciente; ?>" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="fecha" class="form-label">Fecha de la Cita</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha" required>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-3 mb-3">
+                      <label for="hora" class="form-label">Hora</label>
+                      <select class="form-control" id="hora" name="hora" required>
+                        <!-- Opciones de 8am a 8pm -->
+                      </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                      <label for="minuto" class="form-label">Minuto</label>
+                      <select class="form-control" id="minuto" name="minuto" required>
+                        <!-- Opciones: solo múltiplos de 5 -->
+                      </select>
+                    </div>
+
+
+                  </div>
+
+
+
+                </div>
+                <div class="mb-3">
+                  <label for="motivo" class="form-label">Motivo de la Cita</label>
+                  <textarea class="form-control" id="motivo" name="motivo" rows="3" placeholder="Describe brevemente el motivo"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Agendar Cita</button>
+              </form>
+            </div>
+          </div>
+          <hr class="my-4">
+
+          <div class="card">
+            <div class="card-header pb-0">
+              <h6>Mis Citas</h6>
+            </div>
+            <div class="card-body px-4 pt-0 pb-2">
+              <div class="table-responsive">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Folio</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
+
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Hora</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tipo</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Motivo</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    include '../../conexion.php'; // Ajusta la ruta // ← Cambia esto por la CURP del paciente logueado o en sesión
+
+                    $sql = "SELECT * FROM citas_medicas WHERE curp_paciente = '$curpPaciente' ORDER BY fecha DESC";
+                    $result = $conexion->query($sql);
+
+                    if ($result->num_rows > 0) {
+                      while ($row = $result->fetch_assoc()) {
+                        // Convertir hora de 24h a 12h con AM/PM
+                        $horaFormateada = date("g:i A", strtotime($row['hora']));
+
+                        echo "<tr>
+                <td class='text-sm'>{$row['folio']}</td>
+                <td class='text-sm'>{$row['fecha']}</td>
+                <td class='text-sm'>{$horaFormateada}</td>
+                <td class='text-sm'>" . ucfirst(str_replace("_", " ", $row['tipo_consulta'])) . "</td>
+                <td class='text-sm'>{$row['motivo']}</td>
+                <td class='text-sm text-center'>
+                  <form action='cancelar_cita.php' method='post' onsubmit='return confirmarCancelacion()'>
+                    <input type='hidden' name='folio' value='{$row['folio']}'>
+                    <button type='submit' class='btn btn-sm btn-danger rounded-pill mt-3'>Cancelar</button>
+                  </form>
+                </td>
+              </tr>";
+                      }
+                    } else {
+                      echo "<tr><td colspan='6' class='text-center text-sm'>No tienes citas agendadas</td></tr>";
+                    }
+
+                    $conexion->close();
+                    ?>
+
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
-          
+
         </div>
-        <div class="col-12 col-xl-4">
-          <div class="card h-100">
-           
-            <div class="card-body p-3">
-              
-              <ul class="list-group mb-4">
-                <li class="list-group-item active">Detalles Clínicos 🏥</li>
-                <li class="list-group-item">
-                  <strong>Tipo de Sangre:</strong>
-                  <select class="form-control form-control-sm mt-1">
-                    <option selected>O+</option>
-                    <option>A+</option>
-                    <option>B+</option>
-                    <option>AB+</option>
-                    <option>O-</option>
-                  </select>
-                </li>
-                <li class="list-group-item">
-                  <strong>Enfermedades Crónicas:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="Ninguna">
-                </li>
-                <li class="list-group-item">
-                  <strong>Alergias:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="Ninguna">
-                </li>
-                <li class="list-group-item">
-                  <strong>Cirugías Realizadas:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="Ninguna">
-                </li>
-                <li class="list-group-item">
-                  <strong>Prohibiciones Médicas:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="Ninguna">
-                </li>
-                <li class="list-group-item">
-                  <strong>Especificaciones Médicas:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="Ninguna">
-                </li>
-                <li class="list-group-item">
-                  <strong>Documento del último Historial Médico:</strong>
-                  <input type="file" class="form-control form-control-sm mt-1">
-                </li>
-              </ul>
-              
-              <!-- Botón Actualizar -->
-              <div class="text-end">
-                <button class="btn btn-primary btn-sm rounded-pill px-4">
-                  Actualizar Información
-                </button>
-              </div>
-            </div>
-          </div>
-          
-        </div>
+
       </div>
     </div>
-  </div>
-  <!--   Core JS Files   -->
-  <script src="../assets/js/core/popper.min.js"></script>
-  <script src="../assets/js/core/bootstrap.min.js"></script>
-  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
-  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+  </main>
   <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
+    document.addEventListener('DOMContentLoaded', function() {
+      // Cargar opciones de hora
+      const horaSelect = document.getElementById('hora');
+      for (let h = 8; h <= 20; h++) {
+        const hora = h.toString().padStart(2, '0');
+        const option = document.createElement('option');
+        option.value = hora;
+        option.textContent = `${hora} hrs`; // Añadir "hrs" al final de la opción
+        horaSelect.appendChild(option);
       }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
+
+      // Cargar opciones de minuto (múltiplo de 5)
+      const minutoSelect = document.getElementById('minuto');
+      for (let m = 0; m < 60; m += 5) {
+        const minuto = m.toString().padStart(2, '0');
+        const option = document.createElement('option');
+        option.value = minuto;
+        option.textContent = `${minuto} min`; // Añadir "min" al final de la opción
+        minutoSelect.appendChild(option);
+      }
+
+      // Actualizar hora completa al cambiar hora o minuto
+      const inputHidden = document.getElementById('hora_completa');
+
+      function actualizarHoraCompleta() {
+        const h = horaSelect.value;
+        const m = minutoSelect.value;
+        inputHidden.value = `${h}:${m}`;
+      }
+
+      // Escuchar cambios en los selects
+      horaSelect.addEventListener('change', actualizarHoraCompleta);
+      minutoSelect.addEventListener('change', actualizarHoraCompleta);
+    });
   </script>
-  <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-  <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-  <script src="../assets/js/soft-ui-dashboard.min.js?v=1.1.0"></script>
 </body>
 
 </html>

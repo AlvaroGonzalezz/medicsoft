@@ -1,3 +1,39 @@
+<?php
+session_start();
+
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Enfermero") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+include '../../conexion.php';
+$id_enfermero = $_SESSION['id']; // id del enfermero logueado
+$nombreEnfermero = $_SESSION['nombre']; // nombre del enfermero logueado
+// Traer solo los pacientes de este enfermero
+$sql = "
+SELECT 
+    h.id,
+    h.codigo_seguimiento,
+    u.curp AS curp_paciente,
+    u.nombre AS nombre_paciente,
+    h.numero_habitacion,
+    h.diagnostico_principal,
+    h.estado_actual
+FROM 
+    hospitalizados h
+LEFT JOIN usuarios u ON h.id = u.id
+WHERE 
+    h.id_enfermero = ?
+    AND u.hospitalizado = 1
+
+";
+
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param("i", $id_enfermero);
+$stmt->execute();
+$resultado = $stmt->get_result();
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,6 +46,7 @@
     Mis Pacientes - MedicSoft
   </title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
@@ -21,64 +58,64 @@
 
 <body class="g-sidenav-show bg-gray-100">
   <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 "
-  id="sidenav-main">
-  <div class="sidenav-header">
-    <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
-      aria-hidden="true" id="iconSidenav"></i>
-    <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
-      target="_blank">
-      <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
-      <span class="ms-1 font-weight-bold">MedicSoft</span>
-    </a>
-  </div>
-  <hr class="horizontal dark mt-0">
-  <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link " href="../pages/dashboard-enfermero.html">
-          <div
-            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink">
-              <title>shop </title>
-              <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                <g transform="translate(-1716.000000, -439.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                  <g transform="translate(1716.000000, 291.000000)">
-                    <g transform="translate(0.000000, 148.000000)">
-                      <path class="color-background opacity-6"
-                        d="M46.7199583,10.7414583 L40.8449583,0.949791667 C40.4909749,0.360605034 39.8540131,0 39.1666667,0 L7.83333333,0 C7.1459869,0 6.50902508,0.360605034 6.15504167,0.949791667 L0.280041667,10.7414583 C0.0969176761,11.0460037 -1.23209662e-05,11.3946378 -1.23209662e-05,11.75 C-0.00758042603,16.0663731 3.48367543,19.5725301 7.80004167,19.5833333 L7.81570833,19.5833333 C9.75003686,19.5882688 11.6168794,18.8726691 13.0522917,17.5760417 C16.0171492,20.2556967 20.5292675,20.2556967 23.494125,17.5760417 C26.4604562,20.2616016 30.9794188,20.2616016 33.94575,17.5760417 C36.2421905,19.6477597 39.5441143,20.1708521 42.3684437,18.9103691 C45.1927731,17.649886 47.0084685,14.8428276 47.0000295,11.75 C47.0000295,11.3946378 46.9030823,11.0460037 46.7199583,10.7414583 Z">
-                      </path>
-                      <path class="color-background"
-                        d="M39.198,22.4912623 C37.3776246,22.4928106 35.5817531,22.0149171 33.951625,21.0951667 L33.92225,21.1107282 C31.1430221,22.6838032 27.9255001,22.9318916 24.9844167,21.7998837 C24.4750389,21.605469 23.9777983,21.3722567 23.4960833,21.1018359 L23.4745417,21.1129513 C20.6961809,22.6871153 17.4786145,22.9344611 14.5386667,21.7998837 C14.029926,21.6054643 13.533337,21.3722507 13.0522917,21.1018359 C11.4250962,22.0190609 9.63246555,22.4947009 7.81570833,22.4912623 C7.16510551,22.4842162 6.51607673,22.4173045 5.875,22.2911849 L5.875,44.7220845 C5.875,45.9498589 6.7517757,46.9451667 7.83333333,46.9451667 L19.5833333,46.9451667 L19.5833333,33.6066734 L27.4166667,33.6066734 L27.4166667,46.9451667 L39.1666667,46.9451667 C40.2482243,46.9451667 41.125,45.9498589 41.125,44.7220845 L41.125,22.2822926 C40.4887822,22.4116582 39.8442868,22.4815492 39.198,22.4912623 Z">
-                      </path>
+    id="sidenav-main">
+    <div class="sidenav-header">
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
+        aria-hidden="true" id="iconSidenav"></i>
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
+        target="_blank">
+        <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
+        <span class="ms-1 font-weight-bold">MedicSoft</span>
+      </a>
+    </div>
+    <hr class="horizontal dark mt-0">
+    <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link " href="../pages/dashboard-enfermero.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <title>shop </title>
+                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <g transform="translate(-1716.000000, -439.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                    <g transform="translate(1716.000000, 291.000000)">
+                      <g transform="translate(0.000000, 148.000000)">
+                        <path class="color-background opacity-6"
+                          d="M46.7199583,10.7414583 L40.8449583,0.949791667 C40.4909749,0.360605034 39.8540131,0 39.1666667,0 L7.83333333,0 C7.1459869,0 6.50902508,0.360605034 6.15504167,0.949791667 L0.280041667,10.7414583 C0.0969176761,11.0460037 -1.23209662e-05,11.3946378 -1.23209662e-05,11.75 C-0.00758042603,16.0663731 3.48367543,19.5725301 7.80004167,19.5833333 L7.81570833,19.5833333 C9.75003686,19.5882688 11.6168794,18.8726691 13.0522917,17.5760417 C16.0171492,20.2556967 20.5292675,20.2556967 23.494125,17.5760417 C26.4604562,20.2616016 30.9794188,20.2616016 33.94575,17.5760417 C36.2421905,19.6477597 39.5441143,20.1708521 42.3684437,18.9103691 C45.1927731,17.649886 47.0084685,14.8428276 47.0000295,11.75 C47.0000295,11.3946378 46.9030823,11.0460037 46.7199583,10.7414583 Z">
+                        </path>
+                        <path class="color-background"
+                          d="M39.198,22.4912623 C37.3776246,22.4928106 35.5817531,22.0149171 33.951625,21.0951667 L33.92225,21.1107282 C31.1430221,22.6838032 27.9255001,22.9318916 24.9844167,21.7998837 C24.4750389,21.605469 23.9777983,21.3722567 23.4960833,21.1018359 L23.4745417,21.1129513 C20.6961809,22.6871153 17.4786145,22.9344611 14.5386667,21.7998837 C14.029926,21.6054643 13.533337,21.3722507 13.0522917,21.1018359 C11.4250962,22.0190609 9.63246555,22.4947009 7.81570833,22.4912623 C7.16510551,22.4842162 6.51607673,22.4173045 5.875,22.2911849 L5.875,44.7220845 C5.875,45.9498589 6.7517757,46.9451667 7.83333333,46.9451667 L19.5833333,46.9451667 L19.5833333,33.6066734 L27.4166667,33.6066734 L27.4166667,46.9451667 L39.1666667,46.9451667 C40.2482243,46.9451667 41.125,45.9498589 41.125,44.7220845 L41.125,22.2822926 C40.4887822,22.4116582 39.8442868,22.4815492 39.198,22.4912623 Z">
+                        </path>
+                      </g>
                     </g>
                   </g>
                 </g>
-              </g>
-            </svg>
-          </div>
-          <span class="nav-link-text ms-1">Panel Principal</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link  active" href="../pages/pacientes-enfermero.html">
-          <div
-            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i style="color: #181818;" class="bi bi-people-fill"></i>
-          </div>
-          <span class="nav-link-text ms-1">Mis pacientes</span>
-        </a>
-      </li>
-      <!-- <li class="nav-item">
-        <a class="nav-link  " href="../pages/seguimiento.html">
+              </svg>
+            </div>
+            <span class="nav-link-text ms-1">Panel Principal</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link  active" href="../pages/pacientes-enfermero.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i style="color: #181818;" class="bi bi-people-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Mis pacientes</span>
+          </a>
+        </li>
+        <!-- <li class="nav-item">
+        <a class="nav-link  " href="../pages/seguimiento.php">
           <div
             class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
             <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>            </div>
           <span class="nav-link-text ms-1">Mis Tareas</span>
         </a>
       </li> -->
-     
-      <!-- <li class="nav-item">
+
+        <!-- <li class="nav-item">
         <a class="nav-link  " href="../pages/virtual-reality.html">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
             <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -100,50 +137,50 @@
         </a>
       </li> -->
 
-      <li class="nav-item mt-3">
-        <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link  " href="../pages/profile-enfermero.html">
-          <div
-            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink">
-              <title>Yo</title>
-              <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                <g transform="translate(-1717.000000, -291.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                  <g transform="translate(1716.000000, 291.000000)">
-                    <g transform="translate(1.000000, 0.000000)">
-                      <path class="color-background opacity-6"
-                        d="M45,0 L26,0 C25.447,0 25,0.447 25,1 L25,20 C25,20.379 25.214,20.725 25.553,20.895 C25.694,20.965 25.848,21 26,21 C26.212,21 26.424,20.933 26.6,20.8 L34.333,15 L45,15 C45.553,15 46,14.553 46,14 L46,1 C46,0.447 45.553,0 45,0 Z">
-                      </path>
-                      <path class="color-background"
-                        d="M22.883,32.86 C20.761,32.012 17.324,31 13,31 C8.676,31 5.239,32.012 3.116,32.86 C1.224,33.619 0,35.438 0,37.494 L0,41 C0,41.553 0.447,42 1,42 L25,42 C25.553,42 26,41.553 26,41 L26,37.494 C26,35.438 24.776,33.619 22.883,32.86 Z">
-                      </path>
-                      <path class="color-background"
-                        d="M13,28 C17.432,28 21,22.529 21,18 C21,13.589 17.411,10 13,10 C8.589,10 5,13.589 5,18 C5,22.529 8.568,28 13,28 Z">
-                      </path>
+        <li class="nav-item mt-3">
+          <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link  " href="../pages/profile-enfermero.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <title>Yo</title>
+                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <g transform="translate(-1717.000000, -291.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                    <g transform="translate(1716.000000, 291.000000)">
+                      <g transform="translate(1.000000, 0.000000)">
+                        <path class="color-background opacity-6"
+                          d="M45,0 L26,0 C25.447,0 25,0.447 25,1 L25,20 C25,20.379 25.214,20.725 25.553,20.895 C25.694,20.965 25.848,21 26,21 C26.212,21 26.424,20.933 26.6,20.8 L34.333,15 L45,15 C45.553,15 46,14.553 46,14 L46,1 C46,0.447 45.553,0 45,0 Z">
+                        </path>
+                        <path class="color-background"
+                          d="M22.883,32.86 C20.761,32.012 17.324,31 13,31 C8.676,31 5.239,32.012 3.116,32.86 C1.224,33.619 0,35.438 0,37.494 L0,41 C0,41.553 0.447,42 1,42 L25,42 C25.553,42 26,41.553 26,41 L26,37.494 C26,35.438 24.776,33.619 22.883,32.86 Z">
+                        </path>
+                        <path class="color-background"
+                          d="M13,28 C17.432,28 21,22.529 21,18 C21,13.589 17.411,10 13,10 C8.589,10 5,13.589 5,18 C5,22.529 8.568,28 13,28 Z">
+                        </path>
+                      </g>
                     </g>
                   </g>
                 </g>
-              </g>
-            </svg>
-          </div>
-          <span class="nav-link-text ms-1">Mi Información</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link  " href="../pages/cerrar_sesion.php">
-          <div
-            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
-          </div>
-          <span class="nav-link-text ms-1">Cerrar Sesión</span>
-        </a>
-      </li>
-    </ul>
-  </div>
-</aside>
+              </svg>
+            </div>
+            <span class="nav-link-text ms-1">Mi Información</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="confirmarCerrarSesion(event)">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Cerrar Sesión</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </aside>
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
       navbar-scroll="true">
@@ -167,7 +204,7 @@
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?= $nombreEnfermero ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -271,7 +308,7 @@
     <div class="container-fluid py-4">
       <div class="row">
         <div class="col-12">
-          
+
 
           <div class="card">
             <div class="card-header pb-0">
@@ -293,36 +330,30 @@
                       </th>
                     </tr>
                   </thead>
+
                   <tbody>
-                    <tr>
-                      <td class="text-sm">124</td>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm text-center">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSignosVitales">
-                          Registrar Signos Vitales</button>
-                          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMedicamento">
-                            Administrar Medicamento</button>
-                        <button class="btn btn-primary" onclick="window.location.href='https://www.ejemplo.com'">Seguimiento</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="text-sm">124</td>
-                      <td class="text-sm">SAGAS21312</td>
-                      <td class="text-sm">Alvaro S. G.</td>
-                      <td class="text-sm">4</td>
-                      <td class="text-sm">Fractura de Torax</td>
-                      <td class="text-sm">Estable</td>
-                      <td class="text-sm text-center">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSignosVitales">Registrar Signos Vitales</button>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMedicamento">
-                          Administrar Medicamento</button>
-                        <button class="btn btn-primary">Seguimiento</button>
-                      </td>
-                    </tr>
+                    <?php while ($fila = $resultado->fetch_assoc()): ?>
+                      <tr>
+                        <td class="text-sm"><?php echo $fila['id']; ?></td>
+
+                        <td class="text-sm"><?php echo $fila['curp_paciente']; ?></td>
+                        <td class="text-sm"><?php echo $fila['nombre_paciente']; ?></td>
+                        <td class="text-sm" style="text-align: center;"><?php echo $fila['numero_habitacion']; ?></td>
+                        <td class="text-sm"><?php echo $fila['diagnostico_principal']; ?></td>
+                        <td class="text-sm"><?php echo $fila['estado_actual']; ?></td>
+                        <td class="text-sm text-center">
+                          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSignosVitales" onclick="prepararModal(<?php echo $fila['id']; ?>)">
+                            Registrar Signos Vitales
+                          </button>
+                          <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMedicamento">
+                            Administrar Medicamento
+                          </button> -->
+                          <button class="btn btn-primary" onclick="window.location.href='seguimiento.php?codigo=<?php echo $fila['codigo_seguimiento']; ?>'">Seguimiento</button>
+                        </td>
+
+
+                      </tr>
+                    <?php endwhile; ?>
                   </tbody>
                 </table>
               </div>
@@ -334,93 +365,87 @@
       </div>
     </div>
     <!-- Modal Registrar Signos Vitales -->
-<div class="modal" id="modalSignosVitales">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      
-      <!-- Header -->
-      <div class="modal-header">
-        <h5 class="modal-title">🩺Registrar Signos Vitales - Alvaro</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal" id="modalSignosVitales">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Header -->
+          <div class="modal-header">
+            <h5 class="modal-title">🩺Registrar Signos Vitales</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <!-- Body -->
+          <div class="modal-body">
+            <form id="formSignosVitales">
+              <div class="mb-3">
+                <label>Temperatura (°C)</label>
+                <input type="number" step="0.1" class="form-control" name="temperatura">
+              </div>
+              <div class="mb-3">
+                <label>Frecuencia Cardíaca (lpm)</label>
+                <input type="number" class="form-control" name="fc">
+              </div>
+              <div class="mb-3">
+                <label>Presión Arterial (mmHg)</label>
+                <div class="d-flex gap-2">
+                  <input type="number" class="form-control" name="paSistolica" placeholder="Sistólica">
+                  <input type="number" class="form-control" name="paDiastolica" placeholder="Diastólica">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label>Frecuencia Respiratoria (rpm)</label>
+                <input type="number" class="form-control" name="fr">
+              </div>
+              <div class="mb-3">
+                <label>Saturación de Oxígeno (%)</label>
+                <input type="number" class="form-control" name="saturacion">
+              </div>
+              <div class="mb-3">
+                <label>Observaciones</label>
+                <textarea class="form-control" name="observaciones"></textarea>
+              </div>
+            </form>
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="guardarSignosVitales()">💾 Guardar Registro</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+
+        </div>
       </div>
-      
-      <!-- Body -->
-      <div class="modal-body">
-        <form id="formSignosVitales">
-          
-          <div class="mb-3">
-            <label>Temperatura (°C)</label>
-            <input type="number" step="0.1" class="form-control" name="temperatura">
-          </div>
-
-          <div class="mb-3">
-            <label>Frecuencia Cardíaca (lpm)</label>
-            <input type="number" class="form-control" name="fc">
-          </div>
-
-          <div class="mb-3">
-            <label>Presión Arterial (mmHg)</label>
-            <div class="d-flex gap-2">
-              <input type="number" class="form-control" name="paSistolica" placeholder="Sistólica">
-              <input type="number" class="form-control" name="paDiastolica" placeholder="Diastólica">
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label>Frecuencia Respiratoria (rpm)</label>
-            <input type="number" class="form-control" name="fr">
-          </div>
-
-          <div class="mb-3">
-            <label>Saturación de Oxígeno (%)</label>
-            <input type="number" class="form-control" name="saturacion">
-          </div>
-
-          <div class="mb-3">
-            <label>Observaciones</label>
-            <textarea class="form-control" name="observaciones"></textarea>
-          </div>
-
-        </form>
-      </div>
-      
-      <!-- Footer -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary">💾 Guardar Registro</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-      </div>
-
     </div>
-  </div>
-</div>
+
 
     <div class="modal" id="modalMedicamento">
       <div class="modal-dialog">
         <div class="modal-content">
-          
+
           <!-- Header -->
           <div class="modal-header">
             <h5 class="modal-title">Administrar Medicamento - Alvaro</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-          
+
           <!-- Body -->
           <div class="modal-body">
             <form id="formMedicamento">
-              
-              
-    
+
+
+
               <div class="mb-3">
                 <label>Medicamento</label>
                 <input type="text" class="form-control" name="medicamento">
 
               </div>
-    
+
               <div class="mb-3">
                 <label>Dosis / Cantidad </label>
                 <input type="text" class="form-control" name="dosis">
               </div>
-    
+
               <div class="mb-3">
                 <label>Vía de Administración</label>
                 <select class="form-control" name="via">
@@ -445,26 +470,26 @@
                   <option value="24hr">24 horas</option>
                 </select>
               </div>
-              
+
               <div class="mb-3">
                 <label>Hora Programada</label>
                 <input type="time" class="form-control" name="horaProgramada">
               </div>
-    
+
               <div class="mb-3">
                 <label>Observaciones / Reacciones</label>
                 <textarea class="form-control" name="observaciones"></textarea>
               </div>
-    
+
             </form>
           </div>
-          
+
           <!-- Footer -->
           <div class="modal-footer">
             <button type="button" class="btn btn-primary">Confirmar Administración</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           </div>
-    
+
         </div>
       </div>
     </div>
@@ -472,7 +497,95 @@
   <!-- Modal Administrar Medicamento -->
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function confirmarCerrarSesion(e) {
+      e.preventDefault(); // Evita que el enlace se ejecute directo
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Se cerrará tu sesión actual',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '../pages/cerrar_sesion.php';
+        }
+      });
+    }
+    let idPacienteActual = null; // Variable global para el ID del paciente
 
+    // Función para preparar el modal y cargar datos
+    function prepararModal(idPaciente) {
+      idPacienteActual = idPaciente;
+      console.log('Paciente seleccionado: ' + idPaciente);
+
+      // Hacer la solicitud para cargar los signos vitales
+      fetch('cargar_signos.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'id=' + idPacienteActual
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'ok') {
+            // Llenar el formulario con los datos de la base de datos
+            document.querySelector('input[name="temperatura"]').value = data.signos.temperatura || '';
+            document.querySelector('input[name="fc"]').value = data.signos.fc || '';
+            document.querySelector('input[name="paSistolica"]').value = data.signos.paSistolica || '';
+            document.querySelector('input[name="paDiastolica"]').value = data.signos.paDiastolica || '';
+            document.querySelector('input[name="fr"]').value = data.signos.fr || '';
+            document.querySelector('input[name="saturacion"]').value = data.signos.saturacion || '';
+            document.querySelector('textarea[name="observaciones"]').value = data.signos.observaciones || '';
+          } else {
+            Swal.fire('Error', 'No se pudieron cargar los datos', 'error');
+          }
+        })
+        .catch(error => {
+          Swal.fire('Error', 'Hubo un problema al cargar los datos', 'error');
+        });
+    }
+
+    function guardarSignosVitales() {
+      if (!idPacienteActual) {
+        Swal.fire('Error', 'No se seleccionó un paciente', 'error');
+        return;
+      }
+
+      Swal.fire({
+        title: '¿Guardar signos vitales?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, guardar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const formData = new FormData(document.getElementById('formSignosVitales'));
+          formData.append('id', idPacienteActual);
+
+          fetch('guardar_signos.php', {
+              method: 'POST',
+              body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.status === 'ok') {
+                Swal.fire('Éxito', data.msg, 'success').then(() => location.reload());
+              } else {
+                Swal.fire('Error', data.msg, 'error');
+              }
+            })
+            .catch(() => {
+              Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            });
+        }
+      });
+    }
+  </script>
+
+  </script>
 </body>
 
 </html>

@@ -29,6 +29,7 @@ $result3 = $conexion->query($sql3);
     Personal - MedicSoft
   </title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
@@ -44,7 +45,7 @@ $result3 = $conexion->query($sql3);
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -153,7 +154,7 @@ $result3 = $conexion->query($sql3);
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/cerrar_sesion.php">
+          <a class="nav-link" href="#" onclick="confirmarCerrarSesion(event)">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
@@ -856,6 +857,21 @@ $result3 = $conexion->query($sql3);
   <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
 
   <script>
+    function confirmarCerrarSesion(e) {
+      e.preventDefault(); // Evita que el enlace se ejecute directo
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Se cerrará tu sesión actual',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '../pages/cerrar_sesion.php';
+        }
+      });
+    }
     function darDeBaja(id) {
       Swal.fire({
         title: 'Eliminar personal',
@@ -899,7 +915,7 @@ $result3 = $conexion->query($sql3);
     // Esta función se llama cuando se abre el modal
     var modal = document.getElementById('guardarEnfermeroModal');
     var modal2 = document.getElementById('guardarMedicoModal');
-    var modal2 = document.getElementById('guardarAdminModal');
+    var modal3 = document.getElementById('guardarAdminModal');
 
     modal.addEventListener('show.bs.modal', function() {
       // Genera y coloca la contraseña aleatoria
@@ -909,7 +925,7 @@ $result3 = $conexion->query($sql3);
       // Genera y coloca la contraseña aleatoria
       document.getElementById('contrasena2').value = generarContrasena();
     });
-    modal2.addEventListener('show.bs.modal', function() {
+    modal3.addEventListener('show.bs.modal', function() {
       // Genera y coloca la contraseña aleatoria
       document.getElementById('contrasena3').value = generarContrasena();
     });

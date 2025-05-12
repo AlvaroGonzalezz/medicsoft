@@ -9,6 +9,16 @@ echo "
 </style>
 ";
 
+// Función para generar código seguimiento
+function generarCodigo($longitud = 8) {
+    $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $codigo = '';
+    for ($i = 0; $i < $longitud; $i++) {
+        $codigo .= $caracteres[rand(0, strlen($caracteres) - 1)];
+    }
+    return $codigo;
+}
+
 // Verificar que llegaron todos los datos
 if (isset($_GET['paciente'], $_GET['diag'], $_GET['habitacion'], $_GET['estado'], $_GET['enfermero'], $_GET['medico'], $_GET['obs'])) {
     $paciente = $_GET['paciente'];
@@ -19,22 +29,25 @@ if (isset($_GET['paciente'], $_GET['diag'], $_GET['habitacion'], $_GET['estado']
     $medico = $_GET['medico'];
     $obs = $_GET['obs'];
 
-    // Insertar en tabla hospitalizaciones
-    $sql = "INSERT INTO hospitalizados (id, diagnostico_principal, numero_habitacion, estado_actual, id_enfermero, id_medico, observaciones, fecha_ingreso)
-            VALUES ('$paciente', '$diag', '$habitacion', '$estado', '$enfermero', '$medico', '$obs', NOW())";
+    // Generar código seguimiento único
+    $codigoSeguimiento = generarCodigo();
+
+    // Insertar en tabla hospitalizados
+    $sql = "INSERT INTO hospitalizados (id, diagnostico_principal, numero_habitacion, estado_actual, id_enfermero, id_medico, observaciones, fecha_ingreso, codigo_seguimiento)
+            VALUES ('$paciente', '$diag', '$habitacion', '$estado', '$enfermero', '$medico', '$obs', NOW(), '$codigoSeguimiento')";
 
     if ($conexion->query($sql) === TRUE) {
         // Actualizar paciente como hospitalizado
         $update = "UPDATE usuarios SET hospitalizado = 1 WHERE id = '$paciente'";
         $conexion->query($update);
 
-        // Mostrar alerta de éxito
+        // Mostrar alerta de éxito y mostrar código
         echo "
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
                 title: 'Paciente hospitalizado',
-                text: 'El paciente ha sido hospitalizado exitosamente.',
+                html: 'El paciente ha sido hospitalizado exitosamente.<br><b>Código de seguimiento:</b> $codigoSeguimiento',
                 icon: 'success',
                 confirmButtonText: 'Aceptar'
             }).then((result) => {
@@ -85,3 +98,4 @@ if (isset($_GET['paciente'], $_GET['diag'], $_GET['habitacion'], $_GET['estado']
 }
 
 $conexion->close();
+?>

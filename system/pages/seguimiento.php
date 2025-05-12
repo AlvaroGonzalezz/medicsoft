@@ -1,34 +1,54 @@
 <?php
 session_start();
 
-// Verificar si la sesión está activa
-if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Administrativo") {
-  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
-  exit();
-}
+
 include '../../conexion.php';
-// Obtener el nombre desde la sesión
-$nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administración';
 
-// Consulta a la tabla hospitalizados
+if (isset($_SESSION['rol'])) {
+      $rol = $_SESSION['rol'];
+    } else {
+      $rol = 'default'; // o lo que necesites por defecto
+    }
+
+$codigo = $_GET['codigo']; // Lo toma de la URL
+
+// Consulta para obtener los datos del paciente, enfermero y médico
 $sql = "SELECT 
-    h.*, 
-    e.nombre AS nombre_enfermero, 
-    m.nombre AS nombre_medico,
-    u.nombre AS nombre_paciente,
-    u.curp AS curp_paciente
-FROM hospitalizados h 
-JOIN usuarios e ON h.id_enfermero = e.id
-JOIN usuarios m ON h.id_medico = m.id
-JOIN usuarios u ON h.id = u.id
-";
-$resultado = $conexion->query($sql);
+            u.curp, 
+            u.nombre AS nombre_paciente, 
+            h.numero_habitacion, 
+            h.estado_actual,
+            h.id,
+            e.nombre AS nombre_enfermero, 
+            m.nombre AS nombre_medico 
+        FROM hospitalizados h 
+        JOIN usuarios u ON h.id = u.id 
+        JOIN usuarios e ON h.id_enfermero = e.id 
+        JOIN usuarios m ON h.id_medico = m.id 
+        WHERE h.codigo_seguimiento = '$codigo' 
+        LIMIT 1";
 
-// Consulta para pacientes NO hospitalizados
-$sql2 = "SELECT * FROM usuarios WHERE hospitalizado = 0";
-$resultado2 = $conexion->query($sql2);
+// Ejecutar la consulta
+$result = $conexion->query($sql);
+
+if ($result->num_rows > 0) {
+  // Obtener los datos del paciente
+  $row = $result->fetch_assoc();
+
+  $nombrePaciente = $row['nombre_paciente'];
+  $curp = $row['curp'];
+  $numeroHabitacion = $row['numero_habitacion'];
+  $nombreEnfermero = $row['nombre_enfermero'];
+  $nombreMedico = $row['nombre_medico'];
+  $estadoActual = $row['estado_actual'];
+  $idPaciente = $row['id'];
+} else {
+  // Si no se encuentra el código de seguimiento
+  echo "No se encontraron datos para el código de seguimiento proporcionado.";
+}
+
+
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,9 +58,13 @@ $resultado2 = $conexion->query($sql2);
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/icon.png">
   <title>
-    Mis Pacientes - MedicSoft
+    Seguimiento - MedicSoft
   </title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap JS + Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -67,7 +91,19 @@ $resultado2 = $conexion->query($sql2);
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link " href="../pages/dashboard-admin.php">
+          <?php
+    
+    if ($rol == 'Paciente'): ?>
+          <a class="nav-link  " href="../pages/dashboard.php">
+        <?php elseif ($rol == 'Medico'): ?>
+                    <a class="nav-link  " href="../pages/dashboard-medico.php">
+        <?php elseif ($rol == 'Enfermero'): ?>
+                    <a class="nav-link  " href="../pages/dashboard-enfermero.php">
+        <?php elseif ($rol == 'Administrativo'): ?>
+                    <a class="nav-link  " href="../pages/dashboard-admin.php">
+        <?php else: ?>
+                    <a class="nav-link  " href="../pages/dashboard.php">
+        <?php endif; ?>
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -93,24 +129,32 @@ $resultado2 = $conexion->query($sql2);
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active " href="../pages/pacientes-admin.php">
+          <a class="nav-link  " href="../pages/citas.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-people-fill"></i>
+              <i style="color: #181818;" class="bi bi-calendar-event-fill"></i>
             </div>
-            <span class="nav-link-text ms-1">Pacientes</span>
+            <span class="nav-link-text ms-1">Citas</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/personal.php">
+          <a class="nav-link  active" href="../pages/seguimiento.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-person-arms-up"></i>
+              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
             </div>
-            <span class="nav-link-text ms-1">Personal</span>
+            <span class="nav-link-text ms-1">Seguimiento Hospitalario</span>
           </a>
         </li>
-
+        <li class="nav-item">
+          <a class="nav-link" href="../pages/resultados-medicos.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i style="color: #181818;" class="bi bi-folder-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Resultados Médicos</span>
+          </a>
+        </li>
         <!-- <li class="nav-item">
           <a class="nav-link  " href="../pages/virtual-reality.html">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -137,7 +181,7 @@ $resultado2 = $conexion->query($sql2);
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile-admin.php">
+          <a class="nav-link  " href="../pages/profile.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -166,7 +210,7 @@ $resultado2 = $conexion->query($sql2);
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" onclick="confirmarCerrarSesion(event)">
+          <a class="nav-link  " href="../pages/cerrar_sesion.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
@@ -184,9 +228,9 @@ $resultado2 = $conexion->query($sql2);
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Página</a></li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Mis Pacientes</li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Seguimiento Hospitalario</li>
           </ol>
-          <h6 class="font-weight-bolder mb-0">Mis Pacientes</h6>
+          <h6 class="font-weight-bolder mb-0">Seguimiento Hospitalario</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -200,7 +244,7 @@ $resultado2 = $conexion->query($sql2);
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none"><?php echo htmlspecialchars($nombreAdmin); ?></span>
+                <span class="d-sm-inline d-none"><?= $nombrePaciente ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -299,342 +343,196 @@ $resultado2 = $conexion->query($sql2);
         </div>
       </div>
     </nav>
+    <?php
+    
+    if ($rol == 'Enfermero'): ?>
+      <div class="container-fluid py-4 mb-0">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalProcedimiento">
+          Añadir procedimiento 📝
+        </button>
+      </div>
+    <?php endif; ?>
 
-    <!-- Contenido principal -->
-    <div class="container-fluid py-4">
-      <div class="row">
-        <div class="col-12">
 
-
-          <div class="card">
+    <div class="row my-4 mt-0">
+      <div class="container-fluid py-4">
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100">
             <div class="card-header pb-0">
-              <h6>Pacientes Hospitalizados</h6>
+              <h6>Mi Seguimiento Hospitalario</h6>
+
             </div>
-            <div class="card-body px-4 pt-0 pb-2">
-              <div class="table-responsive">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CURP</th>
+            <div class="card-body p-3">
+              <div class="timeline timeline-one-side">
 
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nº Habitación</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Diagnóstico Principal</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Estado Actual</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Enfermero asignado</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Médico asignado</th>
-                      <!-- <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción
-                      </th> -->
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php while ($fila = $resultado->fetch_assoc()): ?>
-                      <tr>
-                        <td class="text-sm"><?php echo $fila['curp_paciente']; ?></td>
-                        <td class="text-sm"><?php echo $fila['nombre_paciente']; ?></td>
-                        <td class="text-sm" style="text-align: center;"><?php echo $fila['numero_habitacion']; ?></td>
-                        <td class="text-sm"><?php echo $fila['diagnostico_principal']; ?></td>
-                        <td class="text-sm"><?php echo $fila['estado_actual']; ?></td>
-                        <td class="text-sm"><?php echo $fila['nombre_enfermero']; ?></td> <!-- nombre -->
-                        <td class="text-sm"><?php echo $fila['nombre_medico']; ?></td> <!-- nombre -->
-                        <!-- <td class="text-sm text-center">
-                          <button class="btn btn-primary" onclick="window.location.href='seguimiento.php?id=<?php echo $fila['id']; ?>'">Seguimiento</button>
-                        </td> -->
-                      </tr>
-                    <?php endwhile; ?>
-                  </tbody>
+                <?php
+                include '../../conexion.php';
 
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="card mt-4">
-            <div class="card-header pb-0">
-              <h6>Pacientes </h6>
-            </div>
-            <div class="card-body px-4 pt-0 pb-2">
-              <div class="table-responsive">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CURP</th>
+                // Aquí va el ID del paciente que estás consultando
+                $sql = "SELECT procedimiento, fecha, hora FROM procedimientos WHERE id_paciente = $idPaciente ORDER BY fecha DESC, hora DESC";
+                $result = $conexion->query($sql);
 
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Teléfono</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Correo Electrónico</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fecha de Nacimiento</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dirección</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ciudad / Estado</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php while ($fila = $resultado2->fetch_assoc()):
-                      $modalId = "modalSignosVitales" . $fila['id']; // Modal único por paciente
-                    ?>
-                      <tr>
-                        <td class="text-sm"><?php echo $fila['curp']; ?></td>
-                        <td class="text-sm"><?php echo $fila['nombre']; ?></td>
-                        <td class="text-sm"><?php echo $fila['telefono']; ?></td>
-                        <td class="text-sm"><?php echo $fila['correo_electronico']; ?></td>
-                        <td class="text-sm"><?php echo $fila['fecha_nacimiento']; ?></td>
-                        <td class="text-sm"><?php echo $fila['direccion']; ?></td>
-                        <td class="text-sm"><?php echo $fila['ciudad'] . '/' . $fila['estado']; ?></td>
-                        <td class="text-sm text-center">
-                          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#<?php echo $modalId; ?>">
-                            Expediente
-                          </button>
-                        </td>
-                      </tr>
+                if ($result->num_rows > 0) {
+                  while ($row = $result->fetch_assoc()) {
+                    $procedimiento = $row['procedimiento'];
+                    $fecha = date('d M', strtotime($row['fecha'])); // Ej: 22 DEC
+                    $hora = date('g:i A', strtotime($row['hora'])); // Ej: 7:20 PM
+                    echo '
+    <div class="timeline-block mb-3">
+      <span class="timeline-step">
+        <i class="ni ni-bell-55 text-success text-gradient"></i>
+      </span>
+      <div class="timeline-content">
+        <h6 class="text-dark text-sm font-weight-bold mb-0">' . htmlspecialchars($procedimiento) . '</h6>
+        <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . $fecha . ' ' . $hora . '</p>
+      </div>
+    </div>';
+                  }
+                } else {
+                  echo '<p>No hay procedimientos registrados.</p>';
+                }
 
-                      <!-- Modal por paciente -->
-                      <div class="modal fade" id="<?php echo $modalId; ?>" tabindex="-1">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
+                ?>
 
-                            <!-- Header -->
-                            <div class="modal-header">
-                              <h5 class="modal-title">📂 Expediente Médico </h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-
-                            <!-- Body -->
-                            <div class="modal-body">
-                              <h5 class="mb-3"><?php echo $fila['nombre']; ?></h5>
-                              <div class="foto-cuadrada mb-3">
-                                <img src="../../uploads/fotos/<?php echo $fila['fotografia_rostro']; ?>" alt="Fotografía" class="img-fluid">
-                              </div>
-                              <h5 class="mb-3">Datos Médicos 🏥</h5>
-                              <div class="mb-2"><strong>Nombre:</strong> <?php echo $fila['nombre']; ?></div>
-
-                              <div class="mb-2"><strong>Tipo de Sangre:</strong> <?php echo $fila['tipo_sangre']; ?></div>
-                              <div class="mb-2"><strong>Enfermedades Crónicas:</strong> <?php echo $fila['enfermedades_cronicas']; ?></div>
-                              <div class="mb-2"><strong>Alergias:</strong> <?php echo $fila['alergias']; ?></div>
-                              <div class="mb-2"><strong>Cirugías:</strong> <?php echo $fila['cirugias_realizadas']; ?></div>
-                              <div class="mb-2"><strong>Prohibiciones Médicas:</strong> <?php echo $fila['prohibiciones_medicas']; ?></div>
-                              <div class="mb-2"><strong>Especificaciones Médicas:</strong> <?php echo $fila['especificaciones_medicas']; ?></div>
-                              <div class="mb-2"><strong>Historial Médico:</strong> <a href="../../uploads/historiales/<?php echo $fila['historial_medico']; ?>" target="_blank">Descargar aquí</a></div>
-                              <hr>
-
-                              <h5 class="mb-3">Últimos Signos Vitales</h5>
-                              <div class="mb-2"><strong>Temperatura:</strong> <?php echo $fila['temperatura']; ?>°C</div>
-                              <div class="mb-2"><strong>Frecuencia Cardíaca:</strong> <?php echo $fila['frecuencia_cardiaca']; ?> lpm</div>
-                              <div class="mb-2"><strong>Presión Arterial:</strong> <?php echo $fila['presion_arterial']; ?></div>
-                              <div class="mb-2"><strong>Frecuencia Respiratoria:</strong> <?php echo $fila['frecuencia_respiratoria']; ?> rpm</div>
-                              <div class="mb-2"><strong>Saturación O₂:</strong> <?php echo $fila['saturacion_o2']; ?>%</div>
-
-                              <hr>
-
-
-
-                            </div>
-
-                            <!-- Footer -->
-                            <div class="modal-footer">
-
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Regresar</button>
-                            </div>
-
-                          </div>
-                        </div>
-                      </div>
-
-                    <?php endwhile; ?>
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>
         </div>
-
       </div>
-    </div>
-    <!-- Modal Registrar Signos Vitales -->
-    <div class="modal" id="modalSignosVitales">
-      <div class="modal-dialog">
-        <div class="modal-content">
 
-          <!-- Header -->
-          <div class="modal-header">
-            <h5 class="modal-title">📂Expediente Médico- Nombre Paciente</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="row my-4 mt-0">
+        <div class="container-fluid py-4 ">
+          <div class="col-12">
+            <div class="card mb-4">
+              <div class="card-header pb-0">
+                <h5>Detalles Generales</h5>
+              </div>
+              <div class="card-body px-4 pt-0 pb-2">
+                <form>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="nombre" class="form-label">Nombre Completo del Paciente</label>
+                      <input type="text" class="form-control" id="nombre" value="<?= isset($nombrePaciente) ? $nombrePaciente : '' ?>" placeholder="Nombre completo" disabled>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="curp" class="form-label">CURP</label>
+                      <input type="text" class="form-control" id="curp" value="<?= isset($curp) ? $curp : '' ?>" placeholder="CURP" disabled>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="habitacion" class="form-label">Número de Habitación</label>
+                      <input type="text" class="form-control" id="habitacion" value="<?= isset($numeroHabitacion) ? $numeroHabitacion : '' ?>" placeholder="123" disabled>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="enfermero" class="form-label">Enfermero Responsable</label>
+                      <input type="text" class="form-control" id="enfermero" value="<?= isset($nombreEnfermero) ? $nombreEnfermero : '' ?>" placeholder="Enfermero" disabled>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="medico" class="form-label">Médico Tratante</label>
+                      <input type="text" class="form-control" id="medico" value="<?= isset($nombreMedico) ? $nombreMedico : '' ?>" placeholder="Médico" disabled>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="medico" class="form-label">Estado de salud</label>
+                      <input type="text" class="form-control" id="medico" value="<?= isset($estadoActual) ? $estadoActual : '' ?>" placeholder="Estado" disabled>
+                    </div>
+                  </div>
+
+
+                </form>
+              </div>
+
+            </div>
+            <div class="card mb-4">
+              <div class="card-header pb-0 mb-3">
+                <h5>Comentarios</h5>
+              </div>
+              <div class="card-body px-4 pt-0 pb-2">
+                <div class="row">
+                  <?php
+                  // Mostrar todos los comentarios del paciente, incluyendo los comentarios del propio paciente
+                  $sqlComentarios = "SELECT c.comentario, u.nombre, u.rol
+                   FROM comentarios c
+                   JOIN usuarios u ON c.id_usuario = u.id
+                   WHERE c.id_paciente = $idPaciente
+                   ORDER BY c.fecha ASC"; // Ordenar por fecha, los más recientes primero
+
+                  $resultComentarios = $conexion->query($sqlComentarios);
+                  if ($resultComentarios->num_rows > 0) {
+                    // Si hay comentarios, los mostramos uno por uno
+                    while ($rowComentario = $resultComentarios->fetch_assoc()) {
+                      // Muestra el nombre del usuario y su comentario
+                      echo "<p><strong>" . htmlspecialchars($rowComentario['nombre']) . "</strong> (" . htmlspecialchars($rowComentario['rol']) . "):</p>
+              <input type='text' class='form-control mb-3' value='" . htmlspecialchars($rowComentario['comentario']) . "' disabled>";
+                    }
+                  } else {
+                    echo "No hay comentarios para este paciente.";
+                  }
+                  ?>
+
+
+                  <div class="mb-3 mt-5">
+
+                    <?php if ($rol == 'Enfermero' || $rol == 'Paciente' || $rol == 'Medico'): ?>
+
+                      <form action="guardar_comentario.php" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="codigo" value="<?= $codigo ?>">
+                        <input type="hidden" name="id_paciente" value="<?= $idPaciente ?>">
+
+                        <textarea name="comentario" class="form-control mb-3" placeholder="Describe brevemente el comentario"></textarea>
+                        <button type="submit" class="btn btn-primary w-30">Añadir comentario</button>
+                      </form>
+                    <?php endif; ?>
+
+                  </div>
+                </div>
+
+              </div>
+              <hr class="my-4">
+            </div>
           </div>
-
-          <!-- Body -->
-          <div class="modal-body">
-
-            <h5 class="mb-3">Datos Generales y Médicos</h5>
-            <div class="mb-2">
-              <strong>Nombre:</strong> Juan Pérez
-            </div>
-            <div class="mb-2">
-              <strong>Edad:</strong> 45 años
-            </div>
-            <div class="mb-2">
-              <strong>Sexo:</strong> Masculino
-            </div>
-            <div class="mb-2">
-              <strong>Tipo de Sangre:</strong> A
-            </div>
-            <div class="mb-2">
-              <strong>Diagnóstico Principal:</strong> Hipertensión arterial
-            </div>
-            <div class="mb-2">
-              <strong>Enfermedades Crónicas:</strong> Hipertensión
-            </div>
-            <div class="mb-2">
-              <strong>Alergias:</strong> Hipertensión
-            </div>
-            <div class="mb-2">
-              <strong>Cirugías:</strong> Hipertensión
-            </div>
-            <div class="mb-2">
-              <strong>Prohibiciones Médicas:</strong> Hipertensión
-            </div>
-            <div class="mb-2">
-              <strong>Especificaciones Médicas:</strong> Hipertensión
-            </div>
-            <div class="mb-2">
-              <strong>Historial Médico:</strong> Descargar
-            </div>
-            <hr>
-
-            <h5 class="mb-3">Últimos Signos Vitales</h5>
-            <div class="mb-2">
-              <strong>Temperatura:</strong> 36.7°C
-            </div>
-            <div class="mb-2">
-              <strong>Frecuencia Cardíaca:</strong> 78 lpm
-            </div>
-            <div class="mb-2">
-              <strong>Presión Arterial:</strong> 120/80 mmHg
-            </div>
-            <div class="mb-2">
-              <strong>Frecuencia Respiratoria:</strong> 18 rpm
-            </div>
-            <div class="mb-2">
-              <strong>Saturación O₂:</strong> 98%
-            </div>
-
-            <hr>
-
-            <h5 class="mb-3">Estudios Médicos</h5>
-            <div class="mb-2">
-              <a href="estudio1.pdf" target="_blank">Radiografía de Tórax - 01/05/2025</a>
-            </div>
-            <div class="mb-2">
-              <a href="estudio2.pdf" target="_blank">Análisis de Sangre - 28/04/2025</a>
-            </div>
-
-          </div>
-
-
-          <!-- Footer -->
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary">💾 Guardar Registro</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          </div>
-
         </div>
-      </div>
-    </div>
+        <!-- Modal -->
+        <div class="modal fade" id="modalProcedimiento" tabindex="-1" aria-labelledby="modalProcedimientoLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
 
-    <div class="modal" id="modalMedicamento">
-      <div class="modal-dialog">
-        <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modalProcedimientoLabel">Añadir procedimiento 📝</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
 
-          <!-- Header -->
-          <div class="modal-header">
-            <h5 class="modal-title">Administrar Medicamento - Alvaro</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              <div class="modal-body">
+                <form action="guardar_procedimiento.php" method="POST">
+                  <input type="hidden" name="id_paciente" value="<?= $idPaciente ?>">
+
+                  <div class="mb-3">
+                    <label for="procedimiento" class="form-label">Procedimiento</label>
+                    <input type="text" class="form-control" id="procedimiento" name="procedimiento" placeholder="Ejemplo: Ingreso a la habitación médica">
+                  </div>
+
+
+                  <div class="mb-3">
+                    <label for="fecha" class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="hora" class="form-label">Hora</label>
+                    <input type="time" class="form-control" id="hora" name="hora">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                  </div>
+                </form>
+              </div>
+
+
+
+            </div>
           </div>
-
-          <!-- Body -->
-          <div class="modal-body">
-            <form id="formMedicamento">
-
-
-
-              <div class="mb-3">
-                <label>Medicamento</label>
-                <input type="text" class="form-control" name="medicamento">
-
-              </div>
-
-              <div class="mb-3">
-                <label>Dosis / Cantidad </label>
-                <input type="text" class="form-control" name="dosis">
-              </div>
-
-              <div class="mb-3">
-                <label>Vía de Administración</label>
-                <select class="form-control" name="via">
-                  <option>Oral</option>
-                  <option>Intravenosa (IV)</option>
-                  <option>Intramuscular (IM)</option>
-                  <option>Subcutánea</option>
-                  <option>Tópica</option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="frecuencia" class="form-label">Realizar operación cada:</label>
-                <select class="form-select" name="frecuencia" id="frecuencia">
-                  <option value="">Seleccione</option>
-                  <option value="30min">30 minutos</option>
-                  <option value="1hr">1 hora</option>
-                  <option value="2hr">2 horas</option>
-                  <option value="4hr">4 horas</option>
-                  <option value="6hr">6 horas</option>
-                  <option value="8hr">8 horas</option>
-                  <option value="12hr">12 horas</option>
-                  <option value="24hr">24 horas</option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label>Hora Programada</label>
-                <input type="time" class="form-control" name="horaProgramada">
-              </div>
-
-              <div class="mb-3">
-                <label>Observaciones / Reacciones</label>
-                <textarea class="form-control" name="observaciones"></textarea>
-              </div>
-
-            </form>
-          </div>
-
-          <!-- Footer -->
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Confirmar Administración</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          </div>
-
         </div>
-      </div>
-    </div>
+
   </main>
-  <!-- Modal Administrar Medicamento -->
-  <script>
-    function confirmarCerrarSesion(e) {
-      e.preventDefault(); // Evita que el enlace se ejecute directo
-      Swal.fire({
-        title: '¿Estás seguro?',
-        text: 'Se cerrará tu sesión actual',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, cerrar sesión',
-        cancelButtonText: 'Cancelar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = '../pages/cerrar_sesion.php';
-        }
-      });
-    }
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 
 </html>

@@ -31,15 +31,8 @@ include 'conexion.php';
 				<div class="form-left">
 					<h2>Información General 📝</h2>
 
-					<div class="form-group">
-						<div class="form-row form-row-1">
-							<input type="text" name="nombre" id="nombre" class="input-text" placeholder="Nombre (s)" required>
-						</div>
-
-						<div class="form-row form-row-2">
-							<input type="text" name="apellidos" id="apellidos" class="input-text" placeholder="Apellidos" required>
-						</div>
-
+					<div class="form-row form-row-2">
+						<input type="text" name="nombre" class="nombre" id="nombre" placeholder="Nombre completo" required>
 					</div>
 					<div class="form-row form-row-2">
 						<input type="text" name="curp" class="curp" id="curp" placeholder="CURP" required>

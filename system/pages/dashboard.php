@@ -1,3 +1,36 @@
+<?php
+session_start();
+
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Paciente") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+include '../../conexion.php'; // Ajusta la ruta si es necesario
+// Obtener el nombre desde la sesión
+$nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Paciente';
+$curpPaciente = isset($_SESSION['curp']) ? $_SESSION['curp'] : '';
+$idPaciente = isset($_SESSION['id']) ? $_SESSION['id'] : '';
+$sql = "SELECT u.hospitalizado, h.codigo_seguimiento
+        FROM usuarios u
+        LEFT JOIN hospitalizados h ON u.id = h.id
+        WHERE u.curp = '$curpPaciente' LIMIT 1";
+$result = $conexion->query($sql);
+
+$estadoMedico = "Desconocido"; // Por defecto
+if ($result->num_rows > 0) {
+  $row = $result->fetch_assoc();
+  $estadoMedico = ($row['hospitalizado'] == 1) ? 'Hospitalizado - Tu código de seguimiento es: ' . $row["codigo_seguimiento"] : "No Hospitalizado";
+}
+// Consulta el código de seguimiento
+$stmt = $conexion->prepare("SELECT codigo_seguimiento FROM hospitalizados WHERE id = ?");
+$stmt->bind_param("i", $idPaciente);
+$stmt->execute();
+$stmt->bind_result($codigo);
+$stmt->fetch();  // Aquí es cuando se obtiene el valor de $codigo
+
+$conexion->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,17 +55,17 @@
   <!-- Nepcha Analytics (nepcha.com) -->
   <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
-  
+
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
- 
+
   <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 "
     id="sidenav-main">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -42,7 +75,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link  active" href="../pages/dashboard.html">
+          <a class="nav-link  active" href="../pages/dashboard.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +101,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/citas.html">
+          <a class="nav-link  " href="../pages/citas.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-calendar-event-fill"></i>
@@ -77,18 +110,20 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/seguimiento.html">
+          <a class="nav-link" href="../pages/seguimiento.php?codigo=<?= $codigo ?>">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>            </div>
+              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
+            </div>
             <span class="nav-link-text ms-1">Seguimiento Hospitalario</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="../pages/resultados-medicos.html">
+          <a class="nav-link" href="../pages/resultados-medicos.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-folder-fill"></i>            </div>
+              <i style="color: #181818;" class="bi bi-folder-fill"></i>
+            </div>
             <span class="nav-link-text ms-1">Resultados Médicos</span>
           </a>
         </li>
@@ -118,7 +153,7 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile.html">
+          <a class="nav-link  " href="../pages/profile.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -182,7 +217,7 @@
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?= $nombreAdmin ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -234,7 +269,7 @@
         <div class="col-lg-6 col-12">
           <div class="row">
             <div class="col-lg-6 col-md-6 col-12">
-              <a class="card-green" href="citas.html">
+              <a class="card-green" href="citas.php">
                 <div class="card">
                   <span class="mask bg-primary opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -254,7 +289,7 @@
               </a>
             </div>
             <div class="col-lg-6 col-md-6 col-12 mt-4 mt-md-0">
-              <a href="profile.html">
+              <a href="profile.php">
                 <div class="card">
                   <span class="mask bg-dark opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -276,7 +311,7 @@
           </div>
           <div class="row mt-4">
             <div class="col-lg-6 col-md-6 col-12">
-              <a href="seguimiento.html">
+              <a href="../pages/seguimiento.php?codigo=<?= $codigo ?>">
                 <div class="card">
                   <span class="mask bg-dark opacity-10 border-radius-lg"></span>
                   <div class="card-body p-3 position-relative">
@@ -316,7 +351,7 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-6 col-12 mt-4 mt-lg-0">
+        <!-- <div class="col-lg-6 col-12 mt-4 mt-lg-0">
           <div class="card shadow h-100">
             <div class="card-header pb-0 p-3">
               <h6 class="mb-0">Mi Tratamiento Médico</h6>
@@ -376,15 +411,15 @@
                   cuánto te falta para completar tu tratamiento.
                 </p>
               </div>
-              <!-- <div class="w-40 text-end">
+              <div class="w-40 text-end">
                 <a class="btn btn-dark mb-0 text-end" href="javascript:;">Más Información</a>
-              </div> -->
+              </div> 
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
-      
-      
+
+
       <div class="row mt-4">
         <div class="col-lg-7 mb-lg-0 mb-4">
           <div class="card">
@@ -393,10 +428,10 @@
                 <div class="col-lg-6">
                   <div class="d-flex flex-column h-100">
                     <p class="mb-1 pt-2 text-bold">Estado Médico</p>
-                    <h5 class="font-weight-bolder mt-4"> Hospitalizado</h5>
-                    
+                    <h5 class="font-weight-bolder mt-4"><?php echo $estadoMedico; ?></h5>
                   </div>
                 </div>
+
                 <div class="col-lg-5 ms-auto text-center mt-5 mt-lg-0">
                   <div class="bg-primary border-radius-lg h-100">
                     <img src="../assets/img/shapes/waves-white.svg"
@@ -422,7 +457,7 @@
                     <h5 class="font-weight-bolder">Resultados Médicos</h5>
                     <p class="mb-5">Consultar resultados de análisis de laboratorio, radiografías, estudios recientes.
                     </p>
-                    <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="resultados-medicos.html">
+                    <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="resultados-medicos.php">
                       Más Información
                       <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
                     </a>
@@ -445,8 +480,8 @@
     </div>
   </main>
   <!--   Core JS Files   -->
-  
-  
+
+
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>
   <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
@@ -455,28 +490,28 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
-  function solicitarCodigo() {
+    function solicitarCodigo() {
       Swal.fire({
-          title: 'Ingresa el código de acceso',
-          text: 'Para acceder a la sección de cuidado familiar, ingresa el código que te proporcionaron.',
-          input: 'text',
-          inputPlaceholder: 'Ejemplo: AS21F',
-          showCancelButton: true,
-          confirmButtonText: 'Ver cuidado',
-          cancelButtonText: 'Cancelar',
-          inputValidator: (value) => {
-              if (!value) {
-                  return '¡Debes ingresar un código!';
-              }
+        title: 'Ingresa el código de acceso',
+        text: 'Para acceder a la sección de cuidado familiar, ingresa el código que te proporcionaron.',
+        input: 'text',
+        inputPlaceholder: 'Ejemplo: AS21F',
+        showCancelButton: true,
+        confirmButtonText: 'Ver cuidado',
+        cancelButtonText: 'Cancelar',
+        inputValidator: (value) => {
+          if (!value) {
+            return '¡Debes ingresar un código!';
           }
+        }
       }).then((result) => {
-          if (result.isConfirmed) {
-              let codigo = result.value;
-              // Aquí puedes concatenar el código a la URL
-              window.location.href = 'verCuidado.php?codigo=' + encodeURIComponent(codigo);
-          }
+        if (result.isConfirmed) {
+          let codigo = result.value;
+          // Aquí puedes concatenar el código a la URL
+          window.location.href = 'seguimiento.php?codigo=' + encodeURIComponent(codigo);
+        }
       });
-  }
+    }
   </script>
   <script>
     var ctx = document.getElementById("chart-bars").getContext("2d");
@@ -494,7 +529,7 @@
           backgroundColor: "#fff",
           data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
           maxBarThickness: 6
-        },],
+        }, ],
       },
       options: {
         responsive: true,
@@ -565,30 +600,30 @@
       data: {
         labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
         datasets: [{
-          label: "Mobile apps",
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-          maxBarThickness: 6
+            label: "Mobile apps",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#cb0c9f",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+            maxBarThickness: 6
 
-        },
-        {
-          label: "Websites",
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#3A416F",
-          borderWidth: 3,
-          backgroundColor: gradientStroke2,
-          fill: true,
-          data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
-          maxBarThickness: 6
-        },
+          },
+          {
+            label: "Websites",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#3A416F",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
+            maxBarThickness: 6
+          },
         ],
       },
       options: {

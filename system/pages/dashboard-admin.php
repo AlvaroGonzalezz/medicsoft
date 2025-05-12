@@ -6,10 +6,20 @@ if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Administrativo") {
   header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
   exit();
 }
+include '../../conexion.php';
 
 // Obtener el nombre desde la sesión
 $nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administración';
 $usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
+
+// Consulta para obtener el estado laboral
+$sql = "SELECT estado_laboral FROM usuarios WHERE id = $usuarioId";
+$result = $conexion->query($sql);
+
+$estadoLaboral = 'fuera'; // Valor por defecto
+if ($result && $row = $result->fetch_assoc()) {
+  $estadoLaboral = $row['estado_laboral']; // Este valor debe ser 'en' o 'fuera'
+}
 ?>
 
 <!DOCTYPE html>
@@ -48,7 +58,7 @@ $usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -157,14 +167,14 @@ $usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/cerrar_sesion.php">
-            <div
-              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+          <a class="nav-link" href="#" onclick="confirmarCerrarSesion(event)">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
             </div>
             <span class="nav-link-text ms-1">Cerrar Sesión</span>
           </a>
         </li>
+
       </ul>
     </div>
   </aside>
@@ -344,13 +354,13 @@ $usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
                   <p class="mb-1 pt-2 text-bold">Estado Laboral</p>
                   <div class="mb-3">
                     <select class="form-control mt-3" id="tipoConsulta" onchange="cambiarIcono()" required>
-                      <option value="fuera" selected>Fuera de Servicio</option>
-                      <option value="en">En Servicio</option>
+                      <option value="fuera" <?= $estadoLaboral == 'fuera' ? 'selected' : '' ?>>Fuera de Servicio</option>
+                      <option value="en" <?= $estadoLaboral == 'en' ? 'selected' : '' ?>>En Servicio</option>
                     </select>
                   </div>
                   <button type="button" class="btn btn-primary" onclick="actualizarEstado(<?= $usuarioId ?>)">Actualizar Estado</button>
-
                 </div>
+
 
                 <!-- Columna Derecha (Decorativa) -->
                 <div class="col-lg-5 ms-auto text-center mt-5 mt-lg-0">
@@ -388,7 +398,7 @@ $usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
                   <option value="">--Selecciona--</option>
                   <?php
                   include '../../conexion.php';
-                  $consulta = "SELECT id, CONCAT(curp, ' ', nombre, ' ', apellidos) AS nombre_completo FROM usuarios WHERE hospitalizado = 0";
+                  $consulta = "SELECT id, CONCAT(curp, ' ', nombre, ' ', apellidos) AS nombre_completo FROM usuarios WHERE hospitalizado = 0 AND rol = 'Paciente'";
                   $resultado = mysqli_query($conexion, $consulta);
                   while ($fila = mysqli_fetch_assoc($resultado)) {
                     echo '<option value="' . $fila['id'] . '">' . $fila['nombre_completo'] . '</option>';
@@ -411,10 +421,10 @@ $usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
                 <label for="estado_actual" class="form-label">Estado actual:</label>
                 <select id="estado_actual" class="form-select" required>
                   <option value="" disabled selected>Selecciona estado</option>
-                  <option value="estable">Estable</option>
-                  <option value="critico">Crítico</option>
-                  <option value="grave">Grave</option>
-                  <option value="recuperacion">En recuperación</option>
+                  <option value="Estable">Estable</option>
+                  <option value="Crítico">Crítico</option>
+                  <option value="Grave">Grave</option>
+                  <option value="Recuperación">En recuperación</option>
                 </select>
               </div>
 
@@ -528,6 +538,22 @@ $usuarioId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
             '&enfermero=' + encodeURIComponent(enfermeroId) +
             '&medico=' + encodeURIComponent(medicoId) +
             '&obs=' + encodeURIComponent(observaciones);
+        }
+      });
+    }
+
+    function confirmarCerrarSesion(e) {
+      e.preventDefault(); // Evita que el enlace se ejecute directo
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Se cerrará tu sesión actual',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '../pages/cerrar_sesion.php';
         }
       });
     }

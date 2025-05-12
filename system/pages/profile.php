@@ -1,4 +1,49 @@
+<?php
+session_start();
 
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Paciente") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+include '../../conexion.php';
+$idPaciente = $_SESSION['id']; // Usa el ID de sesión
+
+// Consulta para traer los datos del paciente
+$sql = "SELECT * FROM usuarios WHERE id = ?";
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param("i", $idPaciente);
+$stmt->execute();
+$resultado = $stmt->get_result();
+
+if ($resultado->num_rows > 0) {
+  $fila = $resultado->fetch_assoc();
+  $nombrePaciente = $fila['nombre'];
+  $curpPaciente = $fila['curp'];
+  $telefonoPaciente = $fila['telefono'];
+  $fecha_nacimientoPaciente = $fila['fecha_nacimiento'];
+  $direccion = $fila['direccion'];
+  $ciudad = $fila['ciudad'];
+  $estado = $fila['estado'];
+  $correo_electronicoPaciente = $fila['correo_electronico'];
+
+  $tipoSangre = $fila['tipo_sangre'];
+  $enfermedadesCronicas = $fila['enfermedades_cronicas'];
+  $alergias = $fila['alergias'];
+  $cirugiasRealizadas = $fila['cirugias_realizadas'];
+  $prohibicionesMedicas = $fila['prohibiciones_medicas'];
+  $especificacionesMedicas = $fila['especificaciones_medicas'];
+  $documentoHistorial = $fila['historial_medico'];
+  $rutaFoto = $fila['fotografia_rostro'];
+} else {
+  // Si no encuentra, puedes dejar valores vacíos
+  $nombrePaciente = $curpPaciente = $telefonoPaciente = $fecha_nacimientoPaciente = $direccion = $ciudad = $estado = $correo_electronicoPaciente = '';
+  $tipoSangre = $enfermedadesCronicas = $alergias = $cirugiasRealizadas = $prohibicionesMedicas = $especificacionesMedicas = $documentoHistorial = '';
+}
+
+$stmt->close();
+$conexion->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -23,6 +68,7 @@
   <!-- Nepcha Analytics (nepcha.com) -->
   <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -31,7 +77,7 @@
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -41,7 +87,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/dashboard-enfermero.html">
+          <a class="nav-link" href="../pages/dashboard.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -67,23 +113,32 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/pacientes-enfermero.html">
+          <a class="nav-link " href="../pages/citas.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-people-fill"></i>
+              <i style="color: #181818;" class="bi bi-calendar-event-fill"></i>
             </div>
-            <span class="nav-link-text ms-1">Mis pacientes</span>
+            <span class="nav-link-text ms-1">Citas</span>
           </a>
         </li>
-        <!-- <li class="nav-item">
-          <a class="nav-link  " href="../pages/seguimiento.html">
+        <li class="nav-item">
+          <a class="nav-link " href="../pages/seguimiento.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>            </div>
-            <span class="nav-link-text ms-1">Mis Tareas</span>
+              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Seguimiento Hospitalario</span>
           </a>
-        </li> -->
-
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../pages/resultados-medicos.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i style="color: #181818;" class="bi bi-folder-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Resultados Médicos</span>
+          </a>
+        </li>
         <!-- <li class="nav-item">
           <a class="nav-link  " href="../pages/virtual-reality.html">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -109,8 +164,8 @@
         <li class="nav-item mt-3">
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
-        <li class="nav-item ">
-          <a class="nav-link  active" href="../pages/profile-enfermero.html">
+        <li class="nav-item">
+          <a class="nav-link  active" href="../pages/profile.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -163,14 +218,14 @@
         </nav>
         <div class="collapse navbar-collapse me-md-0 me-sm-4 mt-sm-0 mt-2" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-            
+
           </div>
           <ul class="navbar-nav justify-content-end">
-            
+
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?= $nombrePaciente ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 pe-0 d-flex align-items-center">
@@ -273,19 +328,19 @@
         <div class="w-100 position-relative p-3">
           <div class="d-flex justify-content-between align-items-end">
             <div class="d-flex align-items-center">
-              <div class="avatar avatar-xl position-relative me-3">
-                <img src="../assets/img/bruce-mars.jpg" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
+              <div class="avatar avatar-xl position-relative me-3 foto-cuadrada">
+                <img src="../../uploads/fotos/<?= $rutaFoto ?>" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
               </div>
               <div>
                 <h5 class="mb-1 text-white font-weight-bolder">
                   Alvaro Sánchez Glz
                 </h5>
                 <p class="mb-0 text-white text-sm">
-                  Personal de Enfermería
+                  Paciente
                 </p>
               </div>
             </div>
-            
+
           </div>
         </div>
       </div>
@@ -294,46 +349,130 @@
       <div class="row">
         <div class="col-12 col-xl-4">
           <div class="card h-100">
-           
+
             <div class="card-body p-3">
-              
+
               <ul class="list-group mb-4">
                 <li class="list-group-item active">Información General 📝</li>
-                <li class="list-group-item">
-                  <strong>ID:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Nombre(s)" value="Alec" disabled>
-                </li>
-                
-                <li class="list-group-item">
-                  <strong>CURP:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="CURP" value="XXXX000000HDFXXX00" disabled>
-                </li>
-                <li class="list-group-item">
-                  <strong>Nombre:</strong>
-                  <input type="text" class="form-control form-control-sm mt-1" placeholder="CURP" value="XXXX000000HDFXXX00" disabled>
-                </li>
-                <li class="list-group-item">
-                  <strong>Teléfono:</strong>
-                  <input type="tel" class="form-control form-control-sm mt-1" placeholder="Teléfono" value="(44) 123 1234 123" disabled>
-                </li>
-                <li class="list-group-item">
-                  <strong>Fecha de Nacimiento:</strong>
-                  <input type="date" class="form-control form-control-sm mt-1" value="1990-01-01" disabled>
-                </li>
-                
-                <li class="list-group-item">
-                  <strong>Correo Electrónico:</strong>
-                  <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="alecthompson@mail.com" disabled>
-                </li>
-                <li class="list-group-item">
-                  <strong>Contraseña:</strong>
-                  <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="alecthompson@mail.com" disabled>
-                </li>
+                <form action="actualizar_info_general.php" method="post" enctype="multipart/form-data">
+                  <li class="list-group-item">
+                    <strong>Nombre completo:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="Nombre(s)" value="<?php echo htmlspecialchars($nombrePaciente); ?>" name="nombre" id="nombre">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>CURP:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="CURP" value="<?php echo htmlspecialchars($curpPaciente); ?>" name="curp">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Teléfono:</strong>
+                    <input type="tel" class="form-control form-control-sm mt-1" placeholder="Teléfono" value="<?php echo htmlspecialchars($telefonoPaciente); ?>" name="telefono">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Fecha de Nacimiento:</strong>
+                    <input type="date" class="form-control form-control-sm mt-1" value="<?php echo htmlspecialchars($fecha_nacimientoPaciente); ?>" name="fecha_nacimiento">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Dirección:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="Dirección" value="<?php echo htmlspecialchars($direccion); ?>" name="direccion"> <!-- Cambié el valor a $especificaciones_medicas, pero ajusta según sea necesario -->
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Ciudad:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="Ciudad" value="<?php echo htmlspecialchars($ciudad); ?>" name="ciudad">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Estado:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="Ciudad" value="<?php echo htmlspecialchars($estado); ?>" name="estado">
+
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Correo Electrónico:</strong>
+                    <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="<?php echo htmlspecialchars($correo_electronicoPaciente); ?>" name="correo">
+                  </li>
+                  <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">
+                      Actualizar Información
+                    </button>
+                  </div>
+                </form>
+
               </ul>
-              
+
+
             </div>
           </div>
-          
+
+        </div>
+        <div class="col-12 col-xl-4">
+          <div class="card h-100">
+
+            <div class="card-body p-3">
+
+              <form action="actualizar_detalles_clinicos.php" method="post" enctype="multipart/form-data">
+                <ul class="list-group mb-4">
+                  <li class="list-group-item active">Detalles Clínicos 🏥</li>
+
+                  <li class="list-group-item">
+                    <strong>Tipo de Sangre:</strong>
+                    <select class="form-control form-control-sm mt-1" name="tipo_sangre">
+                      <option value="O+" <?php if ($tipoSangre == 'O+') echo 'selected'; ?>>O+</option>
+                      <option value="A+" <?php if ($tipoSangre == 'A+') echo 'selected'; ?>>A+</option>
+                      <option value="B+" <?php if ($tipoSangre == 'B+') echo 'selected'; ?>>B+</option>
+                      <option value="AB+" <?php if ($tipoSangre == 'AB+') echo 'selected'; ?>>AB+</option>
+                      <option value="O-" <?php if ($tipoSangre == 'O-') echo 'selected'; ?>>O-</option>
+                    </select>
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Enfermedades Crónicas:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="<?php echo htmlspecialchars($enfermedadesCronicas); ?>" name="enfermedades_cronicas">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Alergias:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="<?php echo htmlspecialchars($alergias); ?>" name="alergias">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Cirugías Realizadas:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="<?php echo htmlspecialchars($cirugiasRealizadas); ?>" name="cirugias_realizadas">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Prohibiciones Médicas:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="<?php echo htmlspecialchars($prohibicionesMedicas); ?>" name="prohibiciones_medicas">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Especificaciones Médicas:</strong>
+                    <input type="text" class="form-control form-control-sm mt-1" placeholder="Escribe aquí" value="<?php echo htmlspecialchars($especificacionesMedicas); ?>" name="especificaciones_medicas">
+                  </li>
+
+                  <li class="list-group-item">
+                    <strong>Documento del último Historial Médico:</strong>
+                    <input type="file" class="form-control form-control-sm mt-1" name="historial_medico">
+                    <?php if (!empty($documentoHistorial)): ?>
+                      <small class="text-muted">Archivo actual: <?php echo htmlspecialchars($documentoHistorial); ?></small>
+                    <?php endif; ?>
+                  </li>
+                </ul>
+
+                <!-- Botón Actualizar -->
+                <div class="text-end">
+                  <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">
+                    Actualizar Información
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

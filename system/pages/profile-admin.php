@@ -16,6 +16,7 @@ $fecha_nacimientoAdmin = isset($_SESSION['fecha_nacimiento']) ? $_SESSION['fecha
 $correo_electronicoAdmin = isset($_SESSION['email']) ? $_SESSION['email'] : '';
 $contrasenaAdmin = isset($_SESSION['contrasena']) ? $_SESSION['contrasena'] : '';
 $idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
+$rutaFotoAdmin = isset($_SESSION['fotografia_rostro']) ? $_SESSION['fotografia_rostro'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,6 +33,8 @@ $idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
   <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
   <!-- Nucleo Icons -->
+  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-svg.css" rel="stylesheet" />
   <!-- Font Awesome Icons -->
@@ -49,7 +52,7 @@ $idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -158,7 +161,7 @@ $idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/cerrar_sesion.php">
+          <a class="nav-link" href="#" onclick="confirmarCerrarSesion(event)">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
@@ -182,10 +185,10 @@ $idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
         </nav>
         <div class="collapse navbar-collapse me-md-0 me-sm-4 mt-sm-0 mt-2" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-            
+
           </div>
           <ul class="navbar-nav justify-content-end">
-            
+
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
@@ -292,19 +295,19 @@ $idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
         <div class="w-100 position-relative p-3">
           <div class="d-flex justify-content-between align-items-end">
             <div class="d-flex align-items-center">
-              <div class="avatar avatar-xl position-relative me-3">
-                <img src="../assets/img/bruce-mars.jpg" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
+              <div class="avatar avatar-xl position-relative me-3 foto-cuadrada">
+                <img src="<?= $rutaFotoAdmin ?>" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
               </div>
               <div>
                 <h5 class="mb-1 text-white font-weight-bolder">
-                  <?php echo htmlspecialchars($nombreAdmin) . " " . htmlspecialchars($apellidosAdmin) ; ?>
+                  <?php echo htmlspecialchars($nombreAdmin) . " " . htmlspecialchars($apellidosAdmin); ?>
                 </h5>
                 <p class="mb-0 text-white text-sm">
                   Personal Administrativo
                 </p>
               </div>
             </div>
-            
+
           </div>
         </div>
       </div>
@@ -313,16 +316,16 @@ $idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
       <div class="row">
         <div class="col-12 col-xl-4">
           <div class="card h-100">
-           
+
             <div class="card-body p-3">
-              
+
               <ul class="list-group mb-4">
                 <li class="list-group-item active">Información General 📝</li>
                 <li class="list-group-item">
                   <strong>ID:</strong>
                   <input type="text" class="form-control form-control-sm mt-1" placeholder="XXXX" value="<?php echo htmlspecialchars($idAdmin)  ?>" disabled>
                 </li>
-                
+
                 <li class="list-group-item">
                   <strong>CURP:</strong>
                   <input type="text" class="form-control form-control-sm mt-1" placeholder="CURP" value="<?php echo htmlspecialchars($curpAdmin)  ?>" disabled>
@@ -339,7 +342,7 @@ $idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
                   <strong>Fecha de Nacimiento:</strong>
                   <input type="date" class="form-control form-control-sm mt-1" value="<?php echo htmlspecialchars($fecha_nacimientoAdmin)  ?>" disabled>
                 </li>
-                
+
                 <li class="list-group-item">
                   <strong>Correo Electrónico:</strong>
                   <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="<?php echo htmlspecialchars($correo_electronicoAdmin)  ?>" disabled>
@@ -349,15 +352,32 @@ $idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
                   <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="<?php echo htmlspecialchars($contrasenaAdmin)  ?>" disabled>
                 </li>
               </ul>
-              
+
             </div>
           </div>
-          
+
         </div>
       </div>
     </div>
   </div>
   <!--   Core JS Files   -->
+  <script>
+    function confirmarCerrarSesion(e) {
+      e.preventDefault(); // Evita que el enlace se ejecute directo
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Se cerrará tu sesión actual',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '../pages/cerrar_sesion.php';
+        }
+      });
+    }
+  </script>
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>
   <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>

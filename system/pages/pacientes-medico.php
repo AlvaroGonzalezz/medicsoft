@@ -1,3 +1,39 @@
+<?php
+session_start();
+
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Medico") {
+  header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+  exit();
+}
+include '../../conexion.php';
+$id_enfermero = $_SESSION['id']; // id del enfermero logueado
+$nombreMedico = $_SESSION['nombre']; // nombre del enfermero logueado
+// Traer solo los pacientes de este enfermero
+$sql = "
+SELECT 
+    h.id,
+        h.codigo_seguimiento,
+
+    u.curp AS curp_paciente,
+    u.nombre AS nombre_paciente,
+    h.numero_habitacion,
+    h.diagnostico_principal,
+    h.estado_actual
+FROM 
+    hospitalizados h
+LEFT JOIN usuarios u ON h.id = u.id
+WHERE 
+    h.id_medico = ?
+    AND u.hospitalizado = 1
+";
+
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param("i", $id_enfermero);
+$stmt->execute();
+$resultado = $stmt->get_result();
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,8 +43,11 @@
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/icon.png">
   <title>
-    Agendar Cita - MedicSoft
+    Mis Pacientes - MedicSoft
   </title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
@@ -23,7 +62,7 @@
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -33,7 +72,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/dashboard.html">
+          <a class="nav-link  " href="../pages/dashboard-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -59,30 +98,24 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/citas.html">
+          <a class="nav-link  active" href="../pages/pacientes-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-calendar-event-fill"></i>
+              <i style="color: #181818;" class="bi bi-people-fill"></i>
             </div>
-            <span class="nav-link-text ms-1">Citas</span>
+            <span class="nav-link-text ms-1">Mis pacientes</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  active" href="../pages/seguimiento.html">
+          <a class="nav-link  " href="../pages/estudios-medicos.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>            </div>
-            <span class="nav-link-text ms-1">Seguimiento Hospitalario</span>
+              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Estudios Médicos</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="../pages/resultados-medicos.html">
-            <div
-              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-folder-fill"></i>            </div>
-            <span class="nav-link-text ms-1">Resultados Médicos</span>
-          </a>
-        </li>
+
         <!-- <li class="nav-item">
           <a class="nav-link  " href="../pages/virtual-reality.html">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -109,7 +142,7 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile.html">
+          <a class="nav-link  " href="../pages/profile-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -138,7 +171,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/cerrar_sesion.php">
+          <a class="nav-link" href="#" onclick="confirmarCerrarSesion(event)">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
@@ -156,9 +189,9 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Página</a></li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Seguimiento Hospitalario</li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Mis Pacientes</li>
           </ol>
-          <h6 class="font-weight-bolder mb-0">Seguimiento Hospitalario</h6>
+          <h6 class="font-weight-bolder mb-0">Mis Pacientes</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -172,7 +205,7 @@
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?php echo htmlspecialchars($nombreMedico); ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -272,108 +305,244 @@
       </div>
     </nav>
 
-    <div class="row my-4">
-      <div class="container-fluid py-4">
-        <div class="col-lg-4 col-md-6">
-          <div class="card h-100">
+    <!-- Contenido principal -->
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+
+
+          <div class="card">
             <div class="card-header pb-0">
-              <h6>Mi Seguimiento Hospitalario</h6>
-
+              <h6>Mis Pacientes</h6>
             </div>
-            <div class="card-body p-3">
-              <div class="timeline timeline-one-side">
-                <div class="timeline-block mb-3">
-                  <span class="timeline-step">
-                    <i class="ni ni-bell-55 text-success text-gradient"></i>
-                  </span>
-                  <div class="timeline-content">
-                    <h6 class="text-dark text-sm font-weight-bold mb-0">Ingreso a la habitacion médica</h6>
-                    <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">22 DEC 7:20 PM</p>
-                  </div>
-                </div>
-                <div class="timeline-block mb-3">
-                  <span class="timeline-step">
-                    <i class="ni ni-bell-55 text-success text-gradient"></i>
-                  </span>
-                  <div class="timeline-content">
-                    <h6 class="text-dark text-sm font-weight-bold mb-0">Recibio su cena</h6>
-                    <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">22 DEC 9:20 PM</p>
-                  </div>
-                </div>
+            <div class="card-body px-4 pt-0 pb-2">
+              <div class="table-responsive">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CURP</th>
+
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nº Habitación</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Diagnóstico Principal</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Estado Actual</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php while ($fila = $resultado->fetch_assoc()): ?>
+                      <tr>
+                        <td class="text-sm"><?php echo $fila['id']; ?></td>
+
+                        <td class="text-sm"><?php echo $fila['curp_paciente']; ?></td>
+                        <td class="text-sm"><?php echo $fila['nombre_paciente']; ?></td>
+                        <td class="text-sm" style="text-align: center;"><?php echo $fila['numero_habitacion']; ?></td>
+                        <td class="text-sm"><?php echo $fila['diagnostico_principal']; ?></td>
+                        <td class="text-sm"><?php echo $fila['estado_actual']; ?></td>
+                        <td class="text-sm text-center">
+                          <button class="btn btn-primary" onclick="window.location.href='seguimiento.php?codigo=<?php echo $fila['codigo_seguimiento']; ?>'">Seguimiento</button>
+                        </td>
+                      </tr>
+                    <?php endwhile; ?>
+                  </tbody>
+
+
+                </table>
               </div>
             </div>
           </div>
+
         </div>
+
       </div>
+    </div>
+    <!-- Modal Registrar Signos Vitales -->
+    <div class="modal" id="modalSignosVitales">
+      <div class="modal-dialog">
+        <div class="modal-content">
 
-      <div class="row my-4 mt-0">
-        <div class="container-fluid py-4 ">
-          <div class="col-12">
-            <div class="card mb-4">
-              <div class="card-header pb-0">
-                <h5>Detalles Generales</h5>
-              </div>
-              <div class="card-body px-4 pt-0 pb-2">
-                <form>
-                  <div class="row">
-                    <div class="col-md-6 mb-3">
-                      <label for="nombre" class="form-label">Nombre Completo del Paciente</label>
-                      <input type="text" class="form-control" id="nombre" placeholder="Nombre completo" disabled>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label for="nombre" class="form-label">CURP</label>
-                      <input type="text" class="form-control" id="nombre" placeholder="CURP" disabled>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label for="nombre" class="form-label">Número de Habitación </label>
-                      <input type="text" class="form-control" id="nombre" placeholder="123" disabled>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label for="nombre" class="form-label">Enfermero Responsable</label>
-                      <input type="text" class="form-control" id="nombre" placeholder="Enfermero" disabled>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label for="nombre" class="form-label">Médico Tratante</label>
-                      <input type="text" class="form-control" id="nombre" placeholder="Médico" disabled>
-                    </div>
-                  </div>
-                  
-
-                </form>
-              </div>
-
-            </div>
-            <div class="card mb-4">
-              <div class="card-header pb-0">
-                <h5>Comentarios</h5>
-              </div>
-              <div class="card-body px-4 pt-0 pb-2">
-                <form>
-                  <div class="row">
-                    <div class="mb-3">
-                      <label for="nombre" class="form-label">Enfermero: Juan</label>
-                      <input type="text" class="form-control" id="nombre" placeholder="Comentario del Enfermero" disabled>
-                    </div>
-                    <div class="mb-3">
-                      <label for="nombre" class="form-label">Médico: Leonel</label>
-                      <input type="text" class="form-control" id="nombre" placeholder="Comentario del Enfermero" disabled>
-                    </div>
-                  <div class="mb-3">
-                    <label for="motivo" class="form-label">Añadir comentario</label>
-                    <textarea class="form-control" id="motivo" rows="3"
-                      placeholder="Describe brevemente el comentario"></textarea>
-                  </div>
-                  <button type="submit" class="btn btn-primary">Añadir comentario</button>
-
-                </form>
-              </div>
-
-            </div>
-            <hr class="my-4">
+          <!-- Header -->
+          <div class="modal-header">
+            <h5 class="modal-title">📂Expediente Médico- <?php echo htmlspecialchars($nombreMedico); ?></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
+
+          <!-- Body -->
+          <div class="modal-body">
+
+            <h5 class="mb-3">Datos Generales y Médicos</h5>
+            <div class="mb-2">
+              <strong>Nombre:</strong> Juan Pérez
+            </div>
+            <div class="mb-2">
+              <strong>Edad:</strong> 45 años
+            </div>
+            <div class="mb-2">
+              <strong>Sexo:</strong> Masculino
+            </div>
+            <div class="mb-2">
+              <strong>Tipo de Sangre:</strong> A
+            </div>
+            <div class="mb-2">
+              <strong>Diagnóstico Principal:</strong> Hipertensión arterial
+            </div>
+            <div class="mb-2">
+              <strong>Enfermedades Crónicas:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Alergias:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Cirugías:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Prohibiciones Médicas:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Especificaciones Médicas:</strong> Hipertensión
+            </div>
+            <div class="mb-2">
+              <strong>Historial Médico:</strong> Descargar
+            </div>
+            <hr>
+
+            <h5 class="mb-3">Últimos Signos Vitales</h5>
+            <div class="mb-2">
+              <strong>Temperatura:</strong> 36.7°C
+            </div>
+            <div class="mb-2">
+              <strong>Frecuencia Cardíaca:</strong> 78 lpm
+            </div>
+            <div class="mb-2">
+              <strong>Presión Arterial:</strong> 120/80 mmHg
+            </div>
+            <div class="mb-2">
+              <strong>Frecuencia Respiratoria:</strong> 18 rpm
+            </div>
+            <div class="mb-2">
+              <strong>Saturación O₂:</strong> 98%
+            </div>
+
+            <hr>
+
+            <h5 class="mb-3">Estudios Médicos</h5>
+            <div class="mb-2">
+              <a href="estudio1.pdf" target="_blank">Radiografía de Tórax - 01/05/2025</a>
+            </div>
+            <div class="mb-2">
+              <a href="estudio2.pdf" target="_blank">Análisis de Sangre - 28/04/2025</a>
+            </div>
+
+          </div>
+
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">💾 Guardar Registro</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+
         </div>
       </div>
+    </div>
+
+    <div class="modal" id="modalMedicamento">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Header -->
+          <div class="modal-header">
+            <h5 class="modal-title">Administrar Medicamento - <?php echo htmlspecialchars($nombreMedico); ?></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <!-- Body -->
+          <div class="modal-body">
+            <form id="formMedicamento">
+
+
+
+              <div class="mb-3">
+                <label>Medicamento</label>
+                <input type="text" class="form-control" name="medicamento">
+
+              </div>
+
+              <div class="mb-3">
+                <label>Dosis / Cantidad </label>
+                <input type="text" class="form-control" name="dosis">
+              </div>
+
+              <div class="mb-3">
+                <label>Vía de Administración</label>
+                <select class="form-control" name="via">
+                  <option>Oral</option>
+                  <option>Intravenosa (IV)</option>
+                  <option>Intramuscular (IM)</option>
+                  <option>Subcutánea</option>
+                  <option>Tópica</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="frecuencia" class="form-label">Realizar operación cada:</label>
+                <select class="form-select" name="frecuencia" id="frecuencia">
+                  <option value="">Seleccione</option>
+                  <option value="30min">30 minutos</option>
+                  <option value="1hr">1 hora</option>
+                  <option value="2hr">2 horas</option>
+                  <option value="4hr">4 horas</option>
+                  <option value="6hr">6 horas</option>
+                  <option value="8hr">8 horas</option>
+                  <option value="12hr">12 horas</option>
+                  <option value="24hr">24 horas</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label>Hora Programada</label>
+                <input type="time" class="form-control" name="horaProgramada">
+              </div>
+
+              <div class="mb-3">
+                <label>Observaciones / Reacciones</label>
+                <textarea class="form-control" name="observaciones"></textarea>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Confirmar Administración</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </main>
+  <!-- Modal Administrar Medicamento -->
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function confirmarCerrarSesion(e) {
+      e.preventDefault(); // Evita que el enlace se ejecute directo
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Se cerrará tu sesión actual',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '../pages/cerrar_sesion.php';
+        }
+      });
+    }
+  </script>
 </body>
 
 </html>

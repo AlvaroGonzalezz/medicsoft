@@ -68,48 +68,94 @@ if ($result->num_rows > 0) {
 
     // Redirigir según el rol
     if ($rol == "Paciente") {
-        header("Location: system/pages/dashboard.php");
-    } elseif ($rol == "Enfermero") {
-        header("Location: system/pages/dashboard-admin.php");
-    } elseif ($rol == "Medico") {
-        header("Location: medico.html");
-    } elseif ($rol == "Administrativo") {
-        header("Location: system/pages/dashboard-admin.php");
-    } else {
-        // Rol desconocido
         echo "
-        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                title: 'Error',
-                text: 'Rol de usuario no reconocido.',
-                icon: 'error',
-                confirmButtonText: 'Aceptar'
-            }).then((result) => {
-                if (result.isConfirmed || result.dismiss) {
-                    window.history.back();
-                }
-            });
-        });
-        </script>
-        ";
-    }
-} else {
-    // Usuario no encontrado
-    echo "
-    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         Swal.fire({
-            title: 'Error de inicio de sesión',
-            text: 'Correo o contraseña incorrectos.',
+            title: 'Bienvenido',
+            text: 'Inicio de sesión exitoso como Paciente.',
+            icon: 'success',
+            confirmButtonText: 'Continuar'
+        }).then(() => {
+            window.location.href = 'system/pages/dashboard.php';
+        });
+    });
+    </script>
+    ";
+    } elseif ($rol == "Enfermero") {
+        echo "
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: 'Bienvenido',
+            text: 'Inicio de sesión exitoso como Enfermero.',
+            icon: 'success',
+            confirmButtonText: 'Continuar'
+        }).then(() => {
+            window.location.href = 'system/pages/dashboard-enfermero.php';
+        });
+    });
+    </script>
+    ";
+    } elseif ($rol == "Medico") {
+        echo "
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: 'Bienvenido',
+            text: 'Inicio de sesión exitoso como Médico.',
+            icon: 'success',
+            confirmButtonText: 'Continuar'
+        }).then(() => {
+            window.location.href = 'system/pages/dashboard-medico.php';
+        });
+    });
+    </script>
+    ";
+    } elseif ($rol == "Administrativo") {
+        echo "
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: 'Bienvenido',
+            text: 'Inicio de sesión exitoso como Administrativo.',
+            icon: 'success',
+            confirmButtonText: 'Continuar'
+        }).then(() => {
+            window.location.href = 'system/pages/dashboard-admin.php';
+        });
+    });
+    </script>
+    ";
+    } else {
+        // Rol desconocido
+        echo "
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: 'Error',
+            text: 'Rol de usuario no reconocido.',
             icon: 'error',
             confirmButtonText: 'Aceptar'
-        }).then((result) => {
-            if (result.isConfirmed || result.dismiss) {
-                window.history.back();
-            }
+        }).then(() => {
+            window.history.back();
+        });
+    });
+    </script>
+    ";
+    }
+} else {
+    // Rol desconocido
+    echo "
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: 'Credenciales incorrectas',
+            text: 'Correo electrónico o contraseña incorrectos.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        }).then(() => {
+            window.history.back();
         });
     });
     </script>

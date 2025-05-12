@@ -1,4 +1,4 @@
-# [Soft UI Dashboard 3](http://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html?ref=readme-sud) [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?url=https://www.creative-tim.com/product/soft-ui-dashboard&text=Check%20Soft%20UI%20Dashboard%20made%20by%20@CreativeTim%20#webdesign%20#dashboard%20#softdesign%20#html%20https://www.creative-tim.com/product/soft-ui-dashboard) [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/FhCJCaHdQa)
+# [Soft UI Dashboard 3](http://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php?ref=readme-sud) [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?url=https://www.creative-tim.com/product/soft-ui-dashboard&text=Check%20Soft%20UI%20Dashboard%20made%20by%20@CreativeTim%20#webdesign%20#dashboard%20#softdesign%20#html%20https://www.creative-tim.com/product/soft-ui-dashboard) [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/FhCJCaHdQa)
 
 ![version](https://img.shields.io/badge/version-1.1.0-blue.svg) [![GitHub issues open](https://img.shields.io/github/issues/creativetimofficial/soft-ui-dashboard.svg)](https://github.com/creativetimofficial/soft-ui-dashboard/issues?q=is%3Aopen+is%3Aissue) [![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/creativetimofficial/soft-ui-dashboard.svg)](https://github.com/creativetimofficial/soft-ui-dashboard/issues?q=is%3Aissue+is%3Aclosed)
 
@@ -30,7 +30,7 @@ You can read more about the <a href="https://www.creative-tim.com/learning-lab/b
 If you want to get inspiration or just show something directly to your clients,
 you can jump start your development with our pre-built example pages. You will be able
 to quickly set up the basic structure for your web project.
-View <a href="https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html" target="_blank">example pages here</a>.
+View <a href="https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php" target="_blank">example pages here</a>.
 
 **HELPFUL LINKS**
 
@@ -72,15 +72,15 @@ Let us know your thoughts below. And good luck with development!
 
 | HTML |
 | --- |
-| [![Soft UI Dashboard HTML](https://s3.amazonaws.com/creativetim_bucket/products/450/thumb/opt_sd_free_thumbnail.jpg?1617715816)](http://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html?ref=readme-sud)
+| [![Soft UI Dashboard HTML](https://s3.amazonaws.com/creativetim_bucket/products/450/thumb/opt_sd_free_thumbnail.jpg?1617715816)](http://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php?ref=readme-sud)
 
 ## Demo
 
-- [Profile page](http://demos.creative-tim.com/soft-ui-dashboard/pages/profile.html?ref=readme-sud)
+- [Profile page](http://demos.creative-tim.com/soft-ui-dashboard/pages/profile.php?ref=readme-sud)
 - [Sign in page](http://demos.creative-tim.com/soft-ui-dashboard/pages/cerrar_sesion.php?ref=readme-sud)
 - [Sign up page](https://demos.creative-tim.com/soft-ui-dashboard/pages/sign-up.html?ref=readme-sud)
 
-[View More](https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html?ref=readme-sud).
+[View More](https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php?ref=readme-sud).
 
 ## Quick start
 
@@ -136,7 +136,7 @@ At present, we officially aim to support the last two versions of the following 
 <img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/chrome.png" width="64" height="64"> <img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/firefox.png" width="64" height="64"> <img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/edge.png" width="64" height="64"> <img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/safari.png" width="64" height="64"> <img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/opera.png" width="64" height="64">
 
 ## Resources
-- [Live Preview](https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html?ref=readme-sud)
+- [Live Preview](https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php?ref=readme-sud)
 - [Download Page](https://www.creative-tim.com/product/soft-ui-dashboard?ref=readme-sud)
 - Documentation is [here](https://www.creative-tim.com/learning-lab/bootstrap/overview/soft-ui-dashboard?ref=readme-sud)
 - [License Agreement](https://www.creative-tim.com/license?ref=readme-sud)

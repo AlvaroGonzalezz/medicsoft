@@ -3,7 +3,6 @@ include("conexion.php");
 echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
 // Recibir datos del formulario
 $nombre = $_POST["nombre"];
-$apellidos = $_POST["apellidos"];
 $curp = $_POST["curp"];
 $telefono = $_POST["telefono"];
 $fecha_nacimiento = $_POST["fecha-nacimiento"];
@@ -36,12 +35,12 @@ $fecha_registro = date("Y-m-d H:i:s");
 
 // Insertar en base de datos
 $sql = "INSERT INTO usuarios (
-    nombre, apellidos, curp, telefono, fecha_nacimiento, direccion, ciudad, estado,
+    nombre, curp, telefono, fecha_nacimiento, direccion, ciudad, estado,
     correo_electronico, contrasena, tipo_sangre, enfermedades_cronicas, alergias,
     cirugias_realizadas, prohibiciones_medicas, especificaciones_medicas,
     historial_medico, fotografia_rostro, fecha_registro, rol
 ) VALUES (
-    '$nombre', '$apellidos', '$curp', '$telefono', '$fecha_nacimiento', '$direccion', '$ciudad', '$estado',
+    '$nombre',  '$curp', '$telefono', '$fecha_nacimiento', '$direccion', '$ciudad', '$estado',
     '$correo_electronico', '$contrasena', '$tipo_sangre', '$enfermedades_cronicas', '$alergias',
     '$cirugias_realizadas', '$prohibiciones_medicas', '$especificaciones_medicas',
     '$historial_medico', '$fotografia_rostro', '$fecha_registro', 'Paciente'

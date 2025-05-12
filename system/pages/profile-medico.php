@@ -1,3 +1,23 @@
+<?php
+session_start();
+
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Medico") {
+  header("Location: http://localhost/medicsoft/login.php");
+  exit();
+}
+
+// Obtener el nombre desde la sesión
+$nombreMedico = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Medico';
+$apellidosMedico = isset($_SESSION['apellidos']) ? $_SESSION['apellidos'] : '';
+$curpMedico = isset($_SESSION['curp']) ? $_SESSION['curp'] : '';
+$telefonoMedico = isset($_SESSION['telefono']) ? $_SESSION['telefono'] : '';
+$fecha_nacimientoMedico = isset($_SESSION['fecha_nacimiento']) ? $_SESSION['fecha_nacimiento'] : '';
+$correo_electronicoMedico = isset($_SESSION['email']) ? $_SESSION['email'] : '';
+$contrasenaMedico = isset($_SESSION['contrasena']) ? $_SESSION['contrasena'] : '';
+$idMedico = isset($_SESSION['id']) ? $_SESSION['id'] : '';
+$rutaFotoMedico = isset($_SESSION['fotografia_rostro']) ? $_SESSION['fotografia_rostro'] : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,14 +27,21 @@
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/icon.png">
   <title>
-    Agendar Cita - MedicSoft
+    Mi Información - MedicSoft
   </title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
+  <!-- Nucleo Icons -->
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <!-- CSS Files -->
   <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.1.0" rel="stylesheet" />
+  <!-- Nepcha Analytics (nepcha.com) -->
+  <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
+  <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -23,7 +50,7 @@
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
         aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
         target="_blank">
         <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -33,7 +60,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/dashboard.html">
+          <a class="nav-link  " href="../pages/dashboard-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -59,32 +86,24 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active " href="../pages/citas.html">
+          <a class="nav-link  " href="../pages/pacientes-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-calendar-event-fill"></i>
+              <i style="color: #181818;" class="bi bi-people-fill"></i>
             </div>
-            <span class="nav-link-text ms-1">Citas</span>
+            <span class="nav-link-text ms-1">Pacientes</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link " href="../pages/seguimiento.html">
+          <a class="nav-link  " href="../pages/personal.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
+              <i style="color: #181818;" class="bi bi-person-arms-up"></i>
             </div>
-            <span class="nav-link-text ms-1">Seguimiento Hospitalario</span>
+            <span class="nav-link-text ms-1">Personal</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="../pages/resultados-medicos.html">
-            <div
-              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-folder-fill"></i>
-            </div>
-            <span class="nav-link-text ms-1">Resultados Médicos</span>
-          </a>
-        </li>
+
         <!-- <li class="nav-item">
           <a class="nav-link  " href="../pages/virtual-reality.html">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -111,7 +130,7 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile.html">
+          <a class="nav-link  active" href="../pages/profile-medico.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -140,7 +159,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/cerrar_sesion.php">
+          <a class="nav-link" href="#" onclick="confirmarCerrarSesion(event)">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-door-closed-fill"></i>
@@ -151,61 +170,61 @@
       </ul>
     </div>
   </aside>
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
-      navbar-scroll="true">
-      <div class="container-fluid py-1 px-3">
+  <div class="main-content position-relative max-height-vh-100 h-100">
+    <!-- Navbar -->
+    <nav class="navbar navbar-main navbar-expand-lg bg-transparent shadow-none position-absolute px-4 w-100 z-index-2">
+      <div class="container-fluid py-1">
         <nav aria-label="breadcrumb">
-          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Página</a></li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Citas</li>
+          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 ps-2 me-sm-6 me-5">
+            <li class="breadcrumb-item text-sm"><a class="text-white opacity-5" href="javascript:;">Página</a></li>
+            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Mi Información</li>
           </ol>
-          <h6 class="font-weight-bolder mb-0">Citas</h6>
+          <h6 class="text-white font-weight-bolder ms-2">Mi Información</h6>
         </nav>
-        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+        <div class="collapse navbar-collapse me-md-0 me-sm-4 mt-sm-0 mt-2" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-            <div class="input-group">
-              <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
-              <input type="text" class="form-control" placeholder="Buscar..">
-            </div>
+
           </div>
-          <ul class="navbar-nav  justify-content-end">
+          <ul class="navbar-nav justify-content-end">
 
             <li class="nav-item d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
+              <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Alvaro</span>
+                <span class="d-sm-inline d-none"><?php echo htmlspecialchars($nombreMedico); ?></span>
               </a>
             </li>
-            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
-                <div class="sidenav-toggler-inner">
-                  <i class="sidenav-toggler-line"></i>
-                  <i class="sidenav-toggler-line"></i>
-                  <i class="sidenav-toggler-line"></i>
-                </div>
+            <li class="nav-item d-xl-none ps-3 pe-0 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-white p-0">
+                <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
+                  <div class="sidenav-toggler-inner">
+                    <i class="sidenav-toggler-line bg-white"></i>
+                    <i class="sidenav-toggler-line bg-white"></i>
+                    <i class="sidenav-toggler-line bg-white"></i>
+                  </div>
+                </a>
               </a>
             </li>
             <li class="nav-item px-3 d-flex align-items-center">
-
+              <a href="javascript:;" class="nav-link text-white p-0">
+                <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
+              </a>
             </li>
             <li class="nav-item dropdown pe-2 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown"
-                aria-expanded="false">
+              <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa fa-bell cursor-pointer"></i>
               </a>
-              <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+              <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-n4" aria-labelledby="dropdownMenuButton">
                 <li class="mb-2">
                   <a class="dropdown-item border-radius-md" href="javascript:;">
                     <div class="d-flex py-1">
                       <div class="my-auto">
-                        <img src="../assets/img/team-2.jpg" class="avatar avatar-sm  me-3 ">
+                        <img src="../assets/img/team-2.jpg" class="avatar avatar-sm me-3">
                       </div>
                       <div class="d-flex flex-column justify-content-center">
                         <h6 class="text-sm font-weight-normal mb-1">
                           <span class="font-weight-bold">New message</span> from Laur
                         </h6>
-                        <p class="text-xs text-secondary mb-0 ">
+                        <p class="text-xs text-secondary mb-0">
                           <i class="fa fa-clock me-1"></i>
                           13 minutes ago
                         </p>
@@ -217,14 +236,13 @@
                   <a class="dropdown-item border-radius-md" href="javascript:;">
                     <div class="d-flex py-1">
                       <div class="my-auto">
-                        <img src="../assets/img/small-logos/logo-spotify.svg"
-                          class="avatar avatar-sm bg-gradient-dark  me-3 ">
+                        <img src="../assets/img/small-logos/logo-spotify.svg" class="avatar avatar-sm bg-gradient-dark me-3">
                       </div>
                       <div class="d-flex flex-column justify-content-center">
                         <h6 class="text-sm font-weight-normal mb-1">
                           <span class="font-weight-bold">New album</span> by Travis Scott
                         </h6>
-                        <p class="text-xs text-secondary mb-0 ">
+                        <p class="text-xs text-secondary mb-0">
                           <i class="fa fa-clock me-1"></i>
                           1 day
                         </p>
@@ -235,20 +253,15 @@
                 <li>
                   <a class="dropdown-item border-radius-md" href="javascript:;">
                     <div class="d-flex py-1">
-                      <div class="avatar avatar-sm bg-gradient-secondary  me-3  my-auto">
-                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1"
-                          xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                      <div class="avatar avatar-sm bg-gradient-secondary me-3 my-auto">
+                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                           <title>credit-card</title>
                           <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                             <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF" fill-rule="nonzero">
                               <g transform="translate(1716.000000, 291.000000)">
                                 <g transform="translate(453.000000, 454.000000)">
-                                  <path class="color-background"
-                                    d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z"
-                                    opacity="0.593633743"></path>
-                                  <path class="color-background"
-                                    d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z">
-                                  </path>
+                                  <path class="color-background" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" opacity="0.593633743"></path>
+                                  <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z"></path>
                                 </g>
                               </g>
                             </g>
@@ -259,7 +272,7 @@
                         <h6 class="text-sm font-weight-normal mb-1">
                           Payment successfully completed
                         </h6>
-                        <p class="text-xs text-secondary mb-0 ">
+                        <p class="text-xs text-secondary mb-0">
                           <i class="fa fa-clock me-1"></i>
                           2 days
                         </p>
@@ -273,123 +286,113 @@
         </div>
       </div>
     </nav>
+    <!-- End Navbar -->
+    <div class="container-fluid">
+      <div class="page-header min-height-250 border-radius-lg mt-4 d-flex flex-column justify-content-end">
+        <span class="mask bg-primary opacity-9"></span>
+        <div class="w-100 position-relative p-3">
+          <div class="d-flex justify-content-between align-items-end">
+            <div class="d-flex align-items-center">
+              <div class="avatar avatar-xl position-relative me-3 foto-cuadrada">
+                <img src="<?= $rutaFotoMedico ?>" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
+              </div>
+              <div>
+                <h5 class="mb-1 text-white font-weight-bolder">
+                  <?php echo htmlspecialchars($nombreMedico) . " " . htmlspecialchars($apellidosMedico); ?>
+                </h5>
+                <p class="mb-0 text-white text-sm">
+                  Personal Médico
+                </p>
+              </div>
+            </div>
 
-    <!-- Contenido principal -->
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="container-fluid py-4">
       <div class="row">
-        <div class="col-12">
-          <div class="card mb-4">
-            <div class="card-header pb-0">
-              <h5>Agendar Cita Médica</h5>
-            </div>
-            <div class="card-body px-4 pt-0 pb-2">
-              <form>
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label for="nombre" class="form-label">Nombre Completo del Paciente</label>
-                    <input type="text" class="form-control" id="nombre" placeholder="Nombre completo" required>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="nombre" class="form-label">CURP</label>
-                    <input type="text" class="form-control" id="nombre" placeholder="CURP" required>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <div class="mb-3">
-                      <label for="tipoConsulta" class="form-label">Tipo de Consulta</label>
-                      <select class="form-control" id="tipoConsulta" required>
-                        <option value="" disabled selected>Selecciona una opción</option>
-                        <option value="medicina_general">Medicina General</option>
-                        <option value="pediatria">Pediatría</option>
-                        <option value="ginecologia">Ginecología</option>
-                        <option value="dermatologia">Dermatología</option>
-                        <option value="odontologia">Odontología</option>
-                        <option value="psicologia">Psicología</option>
-                        <option value="nutricion">Nutrición</option>
-                        <option value="oftalmologia">Oftalmología</option>
-                        <option value="cardiologia">Cardiología</option>
-                        <option value="traumatologia">Traumatología</option>
-                        <option value="traumatologia">Otro</option>
-                      </select>
-                    </div>
+        <div class="col-12 col-xl-4">
+          <div class="card h-100">
 
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="correo" class="form-label">Correo Electrónico</label>
-                    <input type="email" class="form-control" id="correo" placeholder="ejemplo@correo.com" required>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label for="fecha" class="form-label">Fecha de la Cita</label>
-                    <input type="date" class="form-control" id="fecha" required>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="hora" class="form-label">Hora de la Cita</label>
-                    <input type="time" class="form-control" id="hora" required>
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <label for="motivo" class="form-label">Motivo de la Cita</label>
-                  <textarea class="form-control" id="motivo" rows="3"
-                    placeholder="Describe brevemente el motivo"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Agendar Cita</button>
-              </form>
-            </div>
-          </div>
-          <hr class="my-4">
+            <div class="card-body p-3">
 
-          <div class="card">
-            <div class="card-header pb-0">
-              <h6>Mis Citas</h6>
-            </div>
-            <div class="card-body px-4 pt-0 pb-2">
-              <div class="table-responsive">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Folio</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
+              <ul class="list-group mb-4">
+                <li class="list-group-item active">Información General 📝</li>
+                <li class="list-group-item">
+                  <strong>ID:</strong>
+                  <input type="text" class="form-control form-control-sm mt-1" placeholder="XXXX" value="<?php echo htmlspecialchars($idMedico)  ?>" disabled>
+                </li>
 
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Hora</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tipo</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Motivo</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="text-sm">20250</td>
-                      <td class="text-sm">2025-05-10</td>
-                      <td class="text-sm">10:30 AM</td>
-                      <td class="text-sm">Medicina General</td>
-                      <td class="text-sm">Chequeo anual</td>
-                      <td class="text-sm text-center">
-                        <button class="btn btn-sm btn-danger rounded-pill">Cancelar</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="text-sm">20250</td>
-                      <td class="text-sm">2025-05-15</td>
-                      <td class="text-sm">3:00 PM</td>
-                      <td class="text-sm">Dermatología</td>
-                      <td class="text-sm">Revisión de mancha</td>
-                      <td class="text-sm text-center">
-                        <button class="btn btn-sm btn-danger rounded-pill">Cancelar</button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                <li class="list-group-item">
+                  <strong>CURP:</strong>
+                  <input type="text" class="form-control form-control-sm mt-1" placeholder="CURP" value="<?php echo htmlspecialchars($curpMedico)  ?>" disabled>
+                </li>
+                <li class="list-group-item">
+                  <strong>Nombre:</strong>
+                  <input type="text" class="form-control form-control-sm mt-1" placeholder="Nombre completo" value="<?php echo htmlspecialchars($nombreMedico) . ' ' . htmlspecialchars($apellidosMedico) ?>" disabled>
+                </li>
+                <li class="list-group-item">
+                  <strong>Teléfono:</strong>
+                  <input type="tel" class="form-control form-control-sm mt-1" placeholder="Teléfono" value="<?php echo htmlspecialchars($telefonoMedico)  ?>" disabled>
+                </li>
+                <li class="list-group-item">
+                  <strong>Fecha de Nacimiento:</strong>
+                  <input type="date" class="form-control form-control-sm mt-1" value="<?php echo htmlspecialchars($fecha_nacimientoMedico)  ?>" disabled>
+                </li>
+
+                <li class="list-group-item">
+                  <strong>Correo Electrónico:</strong>
+                  <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="<?php echo htmlspecialchars($correo_electronicoMedico)  ?>" disabled>
+                </li>
+                <li class="list-group-item">
+                  <strong>Contraseña:</strong>
+                  <input type="email" class="form-control form-control-sm mt-1" placeholder="Correo" value="<?php echo htmlspecialchars($contrasenaMedico)  ?>" disabled>
+                </li>
+              </ul>
+
             </div>
           </div>
 
         </div>
-
       </div>
     </div>
-  </main>
+  </div>
+  <!--   Core JS Files   -->
+  <script src="../assets/js/core/popper.min.js"></script>
+  <script src="../assets/js/core/bootstrap.min.js"></script>
+  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
+  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+  <script>
+    function confirmarCerrarSesion(e) {
+      e.preventDefault(); // Evita que el enlace se ejecute directo
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Se cerrará tu sesión actual',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '../pages/cerrar_sesion.php';
+        }
+      });
+    }
+  </script>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      var options = {
+        damping: '0.5'
+      }
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+  </script>
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
+  <script src="../assets/js/soft-ui-dashboard.min.js?v=1.1.0"></script>
 </body>
 
 </html>

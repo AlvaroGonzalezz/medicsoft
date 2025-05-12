@@ -1,3 +1,16 @@
+<?php
+session_start();
+
+// Verificar si la sesión está activa
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Paciente") {
+    header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
+    exit();
+}
+
+// Obtener el nombre desde la sesión
+$nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Paciente';
+$idPaciente = isset($_SESSION['id']) ? $_SESSION['id'] : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -23,7 +36,7 @@
         <div class="sidenav-header">
             <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
                 aria-hidden="true" id="iconSidenav"></i>
-            <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html "
+            <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.php "
                 target="_blank">
                 <img src="../assets/img/icon.png" class="navbar-brand-img h-100" alt="main_logo">
                 <span class="ms-1 font-weight-bold">MedicSoft</span>
@@ -33,7 +46,7 @@
         <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link  " href="../pages/dashboard.html">
+                    <a class="nav-link  " href="../pages/dashboard.php">
                         <div
                             class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1"
@@ -60,7 +73,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link " href="../pages/citas.html">
+                    <a class="nav-link " href="../pages/citas.php">
                         <div
                             class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i style="color: #181818;" class="bi bi-calendar-event-fill"></i>
@@ -69,7 +82,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link " href="../pages/seguimiento.html">
+                    <a class="nav-link " href="../pages/seguimiento.php">
                         <div
                             class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
@@ -78,7 +91,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="../pages/resultados-medicos.html">
+                    <a class="nav-link active" href="../pages/resultados-medicos.php">
                         <div
                             class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i style="color: #181818;" class="bi bi-folder-fill"></i>
@@ -112,7 +125,7 @@
                     <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link  " href="../pages/profile.html">
+                    <a class="nav-link  " href="../pages/profile.php">
                         <div
                             class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1"
@@ -178,7 +191,7 @@
                         <li class="nav-item d-flex align-items-center">
                             <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                                 <i class="fa fa-user me-sm-1"></i>
-                                <span class="d-sm-inline d-none">Alvaro</span>
+                                <span class="d-sm-inline d-none"><?= $nombreAdmin ?></span>
                             </a>
                         </li>
                         <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -303,33 +316,43 @@
                                     </th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Comentarios
                                     </th>
-                                    
+
                                     <th
                                         class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">
                                         Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td class="text-sm">Rayos X</td>
-                                    <td class="text-sm">2025-05-10</td>
-                                    <td class="text-sm">10:30 AM</td>
-                                   
-                                    <td class="text-sm">No</td>
-                                    <td class="text-sm text-center">
-                                        <button class="btn btn-sm btn-success rounded-pill">Descargar</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-sm">Sangre</td>
-                                    <td class="text-sm">2025-05-10</td>
-                                    <td class="text-sm">10:30 AM</td>
-                                   
-                                    <td class="text-sm">Chequeo anual</td>
-                                    <td class="text-sm text-center">
-                                        <button class="btn btn-sm btn-success rounded-pill">Descargar</button>
-                                    </td>
-                                </tr>
+                                <?php
+                                include '../../conexion.php'; // Ajusta la ruta si es necesario
+
+                                // Consulta de resultados médicos
+                                $sql = "SELECT * FROM estudios_medicos WHERE id_paciente = '$idPaciente' ORDER BY fecha DESC";
+                                $result = $conexion->query($sql);
+
+                                if ($result->num_rows > 0) {
+                                    while ($row = $result->fetch_assoc()) {
+                                        // Formatear hora
+                                        $horaFormateada = date("g:i A", strtotime($row['fecha']));
+                                        $fecha = date("d/m/Y", strtotime($row['fecha']));
+
+                                        echo "<tr>
+                <td class='text-sm'>{$row['tipo_estudio']}</td>
+                <td class='text-sm'>{$fecha}</td>
+                <td class='text-sm'>{$horaFormateada}</td>
+                <td class='text-sm'>{$row['observaciones']}</td>
+                <td class='text-sm text-center'>
+                    <a href='{$row['archivo']}' class='btn btn-sm btn-primary rounded-pill' download>Descargar</a>
+                </td>
+              </tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='5' class='text-center text-sm'>No hay resultados disponibles</td></tr>";
+                                }
+
+                                $conexion->close();
+                                ?>
+
                             </tbody>
                         </table>
                     </div>
