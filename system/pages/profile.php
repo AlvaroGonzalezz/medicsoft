@@ -333,7 +333,7 @@ $conexion->close();
               </div>
               <div>
                 <h5 class="mb-1 text-white font-weight-bolder">
-                  Alvaro Sánchez Glz
+                  <?php echo htmlspecialchars($nombrePaciente); ?>
                 </h5>
                 <p class="mb-0 text-white text-sm">
                   Paciente

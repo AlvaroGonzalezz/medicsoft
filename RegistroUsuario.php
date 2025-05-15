@@ -1,6 +1,13 @@
 <?php
 include("conexion.php");
 echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
+echo "
+<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+<style>
+.swal2-confirm { background: #30807a !important; }
+.swal2-confirm:hover { background: #0b4a46 !important; }
+</style>
+";
 // Recibir datos del formulario
 $nombre = $_POST["nombre"];
 $curp = $_POST["curp"];
