@@ -45,7 +45,7 @@ $rutaFotoMedico = isset($_SESSION['fotografia_rostro']) ? $_SESSION['fotografia_
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 "
+   <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 "
     id="sidenav-main">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
@@ -91,16 +91,16 @@ $rutaFotoMedico = isset($_SESSION['fotografia_rostro']) ? $_SESSION['fotografia_
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-people-fill"></i>
             </div>
-            <span class="nav-link-text ms-1">Pacientes</span>
+            <span class="nav-link-text ms-1">Mis pacientes</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/personal.php">
+          <a class="nav-link  " href="../pages/estudios-medicos.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i style="color: #181818;" class="bi bi-person-arms-up"></i>
+              <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>
             </div>
-            <span class="nav-link-text ms-1">Personal</span>
+            <span class="nav-link-text ms-1">Estudios Médicos</span>
           </a>
         </li>
 

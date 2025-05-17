@@ -26,11 +26,18 @@ $idPaciente = isset($_SESSION['id']) ? $_SESSION['id'] : '';
     Agendar Cita - MedicSoft
   </title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
+  <!-- Nucleo Icons -->
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <!-- CSS Files -->
   <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.1.0" rel="stylesheet" />
+  <!-- Nepcha Analytics (nepcha.com) -->
+  <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
+  <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -382,6 +389,7 @@ $idPaciente = isset($_SESSION['id']) ? $_SESSION['id'] : '';
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Hora</th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tipo</th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Motivo</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Estado</th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción
                       </th>
                     </tr>
@@ -404,6 +412,8 @@ $idPaciente = isset($_SESSION['id']) ? $_SESSION['id'] : '';
                 <td class='text-sm'>{$horaFormateada}</td>
                 <td class='text-sm'>" . ucfirst(str_replace("_", " ", $row['tipo_consulta'])) . "</td>
                 <td class='text-sm'>{$row['motivo']}</td>
+                <td class='text-sm'>{$row['estado']}</td>
+
                 <td class='text-sm text-center'>
                   <form action='cancelar_cita.php' method='post' onsubmit='return confirmarCancelacion()'>
                     <input type='hidden' name='folio' value='{$row['folio']}'>
@@ -430,6 +440,24 @@ $idPaciente = isset($_SESSION['id']) ? $_SESSION['id'] : '';
       </div>
     </div>
   </main>
+  <script src="../assets/js/core/popper.min.js"></script>
+  <script src="../assets/js/core/bootstrap.min.js"></script>
+  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
+  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+  <script src="../assets/js/plugins/chartjs.min.js"></script>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      var options = {
+        damping: '0.5'
+      }
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <script src="../assets/js/soft-ui-dashboard.min.js?v=1.1.0"></script>
+
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Cargar opciones de hora
@@ -466,6 +494,7 @@ $idPaciente = isset($_SESSION['id']) ? $_SESSION['id'] : '';
       minutoSelect.addEventListener('change', actualizarHoraCompleta);
     });
   </script>
+  
 </body>
 
 </html>

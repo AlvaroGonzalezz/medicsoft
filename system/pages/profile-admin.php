@@ -105,7 +105,15 @@ $rutaFotoAdmin = isset($_SESSION['fotografia_rostro']) ? $_SESSION['fotografia_r
             <span class="nav-link-text ms-1">Personal</span>
           </a>
         </li>
-
+        <li class="nav-item">
+          <a class="nav-link  " href="../pages/citas-admin.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i style="color: #181818;" class="bi bi-calendar-check-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Citas</span>
+          </a>
+        </li>
         <!-- <li class="nav-item">
           <a class="nav-link  " href="../pages/virtual-reality.html">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">

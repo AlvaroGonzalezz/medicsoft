@@ -70,61 +70,29 @@ if ($result->num_rows > 0) {
     if ($rol == "Paciente") {
         echo "
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            title: 'Bienvenido',
-            text: 'Inicio de sesión exitoso como Paciente.',
-            icon: 'success',
-            confirmButtonText: 'Continuar'
-        }).then(() => {
-            window.location.href = 'system/pages/dashboard.php';
-        });
-    });
+                window.location.href = 'system/pages/dashboard.php';
+
     </script>
     ";
     } elseif ($rol == "Enfermero") {
         echo "
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            title: 'Bienvenido',
-            text: 'Inicio de sesión exitoso como Enfermero.',
-            icon: 'success',
-            confirmButtonText: 'Continuar'
-        }).then(() => {
-            window.location.href = 'system/pages/dashboard-enfermero.php';
-        });
-    });
+                window.location.href = 'system/pages/dashboard-enfermero.php';
+
     </script>
     ";
     } elseif ($rol == "Medico") {
         echo "
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            title: 'Bienvenido',
-            text: 'Inicio de sesión exitoso como Médico.',
-            icon: 'success',
-            confirmButtonText: 'Continuar'
-        }).then(() => {
-            window.location.href = 'system/pages/dashboard-medico.php';
-        });
-    });
+                window.location.href = 'system/pages/dashboard-medico.php';
+
     </script>
     ";
     } elseif ($rol == "Administrativo") {
         echo "
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            title: 'Bienvenido',
-            text: 'Inicio de sesión exitoso como Administrativo.',
-            icon: 'success',
-            confirmButtonText: 'Continuar'
-        }).then(() => {
-            window.location.href = 'system/pages/dashboard-admin.php';
-        });
-    });
+                window.location.href = 'system/pages/dashboard-admin.php';
+
     </script>
     ";
     } else {

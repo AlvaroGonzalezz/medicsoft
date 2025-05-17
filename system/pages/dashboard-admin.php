@@ -111,6 +111,15 @@ if ($result && $row = $result->fetch_assoc()) {
             <span class="nav-link-text ms-1">Personal</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link  " href="../pages/citas-admin.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i style="color: #181818;" class="bi bi-calendar-check-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Citas</span>
+          </a>
+        </li>
 
         <!-- <li class="nav-item">
           <a class="nav-link  " href="../pages/virtual-reality.html">
@@ -255,7 +264,7 @@ if ($result && $row = $result->fetch_assoc()) {
 
       <div class="row">
 
-        <div class="col-lg-6 col-12">
+        <div class="col-lg-10 col-12">
           <div class="row">
             <div class="col-lg-6 col-md-6 col-12">
               <a class="card-green" href="pacientes-admin.php">
@@ -297,7 +306,9 @@ if ($result && $row = $result->fetch_assoc()) {
                 </div>
               </a>
             </div>
+
           </div>
+
           <div class="row mt-4">
             <div class="col-lg-6 col-md-6 col-12">
               <a href="personal.php">
@@ -331,7 +342,7 @@ if ($result && $row = $result->fetch_assoc()) {
                         <h5 class="text-white font-weight-bolder mb-0 mt-3">
                           Hospitalización
                         </h5>
-                        <span class="text-white text-sm">Gestionar el egreso del paciente</span>
+                        <span class="text-white text-sm">Gestionar el ingreso del paciente</span>
                       </div>
                     </div>
                   </div>
@@ -345,6 +356,26 @@ if ($result && $row = $result->fetch_assoc()) {
 
 
       <div class="row mt-4">
+        <div class="col-lg-3 col-md-6 col-12 mt-4 mt-md-0 mb-4">
+          <a href="citas-admin.php">
+            <div class="card">
+              <span class="mask bg-dark opacity-10 border-radius-lg"></span>
+              <div class="card-body p-3 position-relative">
+                <div class="row">
+                  <div class="col-8 text-start">
+                    <div class="icon icon-shape bg-white shadow text-center border-radius-2xl">
+                      <i style="color: #181818;" class="bi bi-calendar-check-fill"></i>
+                    </div>
+                    <h5 class="text-white font-weight-bolder mb-0 mt-3">
+                      Citas Médicas
+                    </h5>
+                    <span class="text-white text-sm">Gestiona las citas de los pacientes</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
         <div class="col-lg-7 mb-lg-0 mb-4">
           <div class="card">
             <div class="card-body p-3">

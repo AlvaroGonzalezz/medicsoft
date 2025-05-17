@@ -2,37 +2,17 @@
 session_start();
 
 // Verificar si la sesión está activa
-if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Enfermero") {
+if (!isset($_SESSION['email']) || $_SESSION['rol'] != "Administrativo") {
   header("Location: http://localhost/medicsoft/login.php"); // Si no es admin, lo manda al login
   exit();
 }
-include '../../conexion.php';
-$id_enfermero = $_SESSION['id']; // id del enfermero logueado
-$nombreEnfermero = $_SESSION['nombre']; // nombre del enfermero logueado
-// Traer solo los pacientes de este enfermero
-$sql = "
-SELECT 
-    h.id,
-    h.codigo_seguimiento,
-    u.curp AS curp_paciente,
-    u.nombre AS nombre_paciente,
-    h.numero_habitacion,
-    h.diagnostico_principal,
-    h.estado_actual
-FROM 
-    hospitalizados h
-LEFT JOIN usuarios u ON h.id = u.id
-WHERE 
-    h.id_enfermero = ?
-    AND u.hospitalizado = 1
 
-";
-
-$stmt = $conexion->prepare($sql);
-$stmt->bind_param("i", $id_enfermero);
-$stmt->execute();
-$resultado = $stmt->get_result();
-
+// Obtener el nombre desde la sesión
+$nombreAdmin = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Administrativo';
+$curpAdmin = isset($_SESSION['curp']) ? $_SESSION['curp'] : '';
+$telefonoAdmin = isset($_SESSION['telefono']) ? $_SESSION['telefono'] : '';
+$correo_electronicoAdmin = isset($_SESSION['email']) ? $_SESSION['email'] : '';
+$idAdmin = isset($_SESSION['id']) ? $_SESSION['id'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,11 +23,8 @@ $resultado = $stmt->get_result();
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/icon.png">
   <title>
-    Mis Pacientes - MedicSoft
+    Citas - MedicSoft
   </title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
@@ -72,7 +49,7 @@ $resultado = $stmt->get_result();
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link " href="../pages/dashboard-enfermero.php">
+          <a class="nav-link  " href="../pages/dashboard-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -98,50 +75,59 @@ $resultado = $stmt->get_result();
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link  active" href="../pages/pacientes-enfermero.php">
+          <a class="nav-link  " href="../pages/pacientes-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <i style="color: #181818;" class="bi bi-people-fill"></i>
             </div>
-            <span class="nav-link-text ms-1">Mis pacientes</span>
+            <span class="nav-link-text ms-1">Pacientes</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link  " href="../pages/personal.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i style="color: #181818;" class="bi bi-person-arms-up"></i>
+            </div>
+            <span class="nav-link-text ms-1">Personal</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link  active" href="../pages/citas-admin.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i style="color: #181818;" class="bi bi-calendar-check-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Citas</span>
           </a>
         </li>
         <!-- <li class="nav-item">
-        <a class="nav-link  " href="../pages/seguimiento.php">
-          <div
-            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i style="color: #181818;" class="bi bi-clipboard2-pulse-fill"></i>            </div>
-          <span class="nav-link-text ms-1">Mis Tareas</span>
-        </a>
-      </li> -->
-
-        <!-- <li class="nav-item">
-        <a class="nav-link  " href="../pages/virtual-reality.html">
-          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-              <title>box-3d-50</title>
-              <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                <g transform="translate(-2319.000000, -291.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                  <g transform="translate(1716.000000, 291.000000)">
-                    <g transform="translate(603.000000, 0.000000)">
-                      <path class="color-background" d="M22.7597136,19.3090182 L38.8987031,11.2395234 C39.3926816,10.9925342 39.592906,10.3918611 39.3459167,9.89788265 C39.249157,9.70436312 39.0922432,9.5474453 38.8987261,9.45068056 L20.2741875,0.1378125 L20.2741875,0.1378125 C19.905375,-0.04725 19.469625,-0.04725 19.0995,0.1378125 L3.1011696,8.13815822 C2.60720568,8.38517662 2.40701679,8.98586148 2.6540352,9.4798254 C2.75080129,9.67332903 2.90771305,9.83023153 3.10122239,9.9269862 L21.8652864,19.3090182 C22.1468139,19.4497819 22.4781861,19.4497819 22.7597136,19.3090182 Z"></path>
-                      <path class="color-background opacity-6" d="M23.625,22.429159 L23.625,39.8805372 C23.625,40.4328219 24.0727153,40.8805372 24.625,40.8805372 C24.7802551,40.8805372 24.9333778,40.8443874 25.0722402,40.7749511 L41.2741875,32.673375 L41.2741875,32.673375 C41.719125,32.4515625 42,31.9974375 42,31.5 L42,14.241659 C42,13.6893742 41.5522847,13.241659 41,13.241659 C40.8447549,13.241659 40.6916418,13.2778041 40.5527864,13.3472318 L24.1777864,21.5347318 C23.8390024,21.7041238 23.625,22.0503869 23.625,22.429159 Z"></path>
-                      <path class="color-background opacity-6" d="M20.4472136,21.5347318 L1.4472136,12.0347318 C0.953235098,11.7877425 0.352562058,11.9879669 0.105572809,12.4819454 C0.0361450918,12.6208008 6.47121774e-16,12.7739139 0,12.929159 L0,30.1875 L0,30.1875 C0,30.6849375 0.280875,31.1390625 0.7258125,31.3621875 L19.5528096,40.7750766 C20.0467945,41.0220531 20.6474623,40.8218132 20.8944388,40.3278283 C20.963859,40.1889789 21,40.0358742 21,39.8806379 L21,22.429159 C21,22.0503869 20.7859976,21.7041238 20.4472136,21.5347318 Z"></path>
+          <a class="nav-link  " href="../pages/virtual-reality.html">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <title>box-3d-50</title>
+                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <g transform="translate(-2319.000000, -291.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                    <g transform="translate(1716.000000, 291.000000)">
+                      <g transform="translate(603.000000, 0.000000)">
+                        <path class="color-background" d="M22.7597136,19.3090182 L38.8987031,11.2395234 C39.3926816,10.9925342 39.592906,10.3918611 39.3459167,9.89788265 C39.249157,9.70436312 39.0922432,9.5474453 38.8987261,9.45068056 L20.2741875,0.1378125 L20.2741875,0.1378125 C19.905375,-0.04725 19.469625,-0.04725 19.0995,0.1378125 L3.1011696,8.13815822 C2.60720568,8.38517662 2.40701679,8.98586148 2.6540352,9.4798254 C2.75080129,9.67332903 2.90771305,9.83023153 3.10122239,9.9269862 L21.8652864,19.3090182 C22.1468139,19.4497819 22.4781861,19.4497819 22.7597136,19.3090182 Z"></path>
+                        <path class="color-background opacity-6" d="M23.625,22.429159 L23.625,39.8805372 C23.625,40.4328219 24.0727153,40.8805372 24.625,40.8805372 C24.7802551,40.8805372 24.9333778,40.8443874 25.0722402,40.7749511 L41.2741875,32.673375 L41.2741875,32.673375 C41.719125,32.4515625 42,31.9974375 42,31.5 L42,14.241659 C42,13.6893742 41.5522847,13.241659 41,13.241659 C40.8447549,13.241659 40.6916418,13.2778041 40.5527864,13.3472318 L24.1777864,21.5347318 C23.8390024,21.7041238 23.625,22.0503869 23.625,22.429159 Z"></path>
+                        <path class="color-background opacity-6" d="M20.4472136,21.5347318 L1.4472136,12.0347318 C0.953235098,11.7877425 0.352562058,11.9879669 0.105572809,12.4819454 C0.0361450918,12.6208008 6.47121774e-16,12.7739139 0,12.929159 L0,30.1875 L0,30.1875 C0,30.6849375 0.280875,31.1390625 0.7258125,31.3621875 L19.5528096,40.7750766 C20.0467945,41.0220531 20.6474623,40.8218132 20.8944388,40.3278283 C20.963859,40.1889789 21,40.0358742 21,39.8806379 L21,22.429159 C21,22.0503869 20.7859976,21.7041238 20.4472136,21.5347318 Z"></path>
+                      </g>
                     </g>
                   </g>
                 </g>
-              </g>
-            </svg>
-          </div>
-          <span class="nav-link-text ms-1">Virtual Reality</span>
-        </a>
-      </li> -->
+              </svg>
+            </div>
+            <span class="nav-link-text ms-1">Virtual Reality</span>
+          </a>
+        </li> -->
 
         <li class="nav-item mt-3">
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Personal</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile-enfermero.php">
+          <a class="nav-link " href="../pages/profile-admin.php">
             <div
               class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -188,9 +174,9 @@ $resultado = $stmt->get_result();
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Página</a></li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Mis Pacientes</li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Citas</li>
           </ol>
-          <h6 class="font-weight-bolder mb-0">Mis Pacientes</h6>
+          <h6 class="font-weight-bolder mb-0">Citas</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -204,7 +190,7 @@ $resultado = $stmt->get_result();
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none"><?= $nombreEnfermero ?></span>
+                <span class="d-sm-inline d-none"><?= $nombreAdmin ?></span>
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -233,7 +219,7 @@ $resultado = $stmt->get_result();
                       </div>
                       <div class="d-flex flex-column justify-content-center">
                         <h6 class="text-sm font-weight-normal mb-1">
-                          <span class="font-weight-bold">New message</span> from Laur
+                          <span class="font-weight-bold">Nuevo mensaje</span> de seguimiento
                         </h6>
                         <p class="text-xs text-secondary mb-0 ">
                           <i class="fa fa-clock me-1"></i>
@@ -309,51 +295,67 @@ $resultado = $stmt->get_result();
       <div class="row">
         <div class="col-12">
 
-
           <div class="card">
             <div class="card-header pb-0">
-              <h6>Mis Pacientes</h6>
+              <h6>Mis Citas</h6>
             </div>
             <div class="card-body px-4 pt-0 pb-2">
               <div class="table-responsive">
                 <table class="table align-items-center mb-0">
                   <thead>
                     <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CURP</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Folio</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
 
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nº Habitación</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Diagnóstico Principal</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Estado Actual</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Hora</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tipo</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Motivo</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Estado</th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Acción
                       </th>
                     </tr>
                   </thead>
-
                   <tbody>
-                    <?php while ($fila = $resultado->fetch_assoc()): ?>
-                      <tr>
-                        <td class="text-sm"><?php echo $fila['id']; ?></td>
+                    <?php
+                    include '../../conexion.php'; // Ajusta la ruta // ← Cambia esto por la CURP del paciente logueado o en sesión
 
-                        <td class="text-sm"><?php echo $fila['curp_paciente']; ?></td>
-                        <td class="text-sm"><?php echo $fila['nombre_paciente']; ?></td>
-                        <td class="text-sm" style="text-align: center;"><?php echo $fila['numero_habitacion']; ?></td>
-                        <td class="text-sm"><?php echo $fila['diagnostico_principal']; ?></td>
-                        <td class="text-sm"><?php echo $fila['estado_actual']; ?></td>
-                        <td class="text-sm text-center">
-                          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSignosVitales" onclick="prepararModal(<?php echo $fila['id']; ?>)">
-                            Registrar Signos Vitales
-                          </button>
-                          <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMedicamento">
-                            Administrar Medicamento
-                          </button> -->
-                          <button class="btn btn-primary" onclick="window.location.href='seguimiento.php?codigo=<?php echo $fila['codigo_seguimiento']; ?>'">Seguimiento</button>
-                        </td>
+                    $sql = "SELECT * FROM citas_medicas ORDER BY fecha DESC";
+                    $result = $conexion->query($sql);
 
+                    if ($result->num_rows > 0) {
+                      while ($row = $result->fetch_assoc()) {
+                        // Convertir hora de 24h a 12h con AM/PM
+                        $horaFormateada = date("g:i A", strtotime($row['hora']));
 
-                      </tr>
-                    <?php endwhile; ?>
+                        echo "<tr>
+                <td class='text-sm'>{$row['folio']}</td>
+                <td class='text-sm'>{$row['fecha']}</td>
+                <td class='text-sm'>{$horaFormateada}</td>
+                <td class='text-sm'>" . ucfirst(str_replace("_", " ", $row['tipo_consulta'])) . "</td>
+                <td class='text-sm'>{$row['motivo']}</td>
+                <td class='text-sm'>{$row['estado']}</td>
+                <td class='text-sm text-center'>
+                  <form action='confirmar_cita.php' method='post' onsubmit='return confirmarCita()'>
+                    <input type='hidden' name='folio' value='{$row['folio']}'>
+                    <button type='submit' class='btn btn-sm btn-primary rounded-pill mt-3 md-10'>Confirmar</button>
+                  </form>
+                </td>
+                <td class='text-sm text-center'>
+                  <form action='cancelar_cita.php' method='post' onsubmit='return confirmarCancelacion()'>
+                    <input type='hidden' name='folio' value='{$row['folio']}'>
+                    <button type='submit' class='btn btn-sm btn-danger rounded-pill mt-3'>Cancelar / Atendida</button>
+                  </form>
+                </td>
+                
+              </tr>";
+                      }
+                    } else {
+                      echo "<tr><td colspan='6' class='text-center text-sm'>No hay citas agendadas</td></tr>";
+                    }
+
+                    $conexion->close();
+                    ?>
+
                   </tbody>
                 </table>
               </div>
@@ -364,138 +366,8 @@ $resultado = $stmt->get_result();
 
       </div>
     </div>
-    <!-- Modal Registrar Signos Vitales -->
-    <div class="modal" id="modalSignosVitales">
-      <div class="modal-dialog">
-        <div class="modal-content">
-
-          <!-- Header -->
-          <div class="modal-header">
-            <h5 class="modal-title">🩺Registrar Signos Vitales</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-
-          <!-- Body -->
-          <div class="modal-body">
-            <form id="formSignosVitales">
-              <div class="mb-3">
-                <label>Temperatura (°C)</label>
-                <input type="number" step="0.1" class="form-control" name="temperatura">
-              </div>
-              <div class="mb-3">
-                <label>Frecuencia Cardíaca (lpm)</label>
-                <input type="number" class="form-control" name="fc">
-              </div>
-              <div class="mb-3">
-                <label>Presión Arterial (mmHg)</label>
-                <div class="d-flex gap-2">
-                  <input type="number" class="form-control" name="paSistolica" placeholder="Sistólica">
-                  <input type="number" class="form-control" name="paDiastolica" placeholder="Diastólica">
-                </div>
-              </div>
-              <div class="mb-3">
-                <label>Frecuencia Respiratoria (rpm)</label>
-                <input type="number" class="form-control" name="fr">
-              </div>
-              <div class="mb-3">
-                <label>Saturación de Oxígeno (%)</label>
-                <input type="number" class="form-control" name="saturacion">
-              </div>
-              <div class="mb-3">
-                <label>Observaciones</label>
-                <textarea class="form-control" name="observaciones"></textarea>
-              </div>
-            </form>
-          </div>
-
-          <!-- Footer -->
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" onclick="guardarSignosVitales()">💾 Guardar Registro</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-
-    <div class="modal" id="modalMedicamento">
-      <div class="modal-dialog">
-        <div class="modal-content">
-
-          <!-- Header -->
-          <div class="modal-header">
-            <h5 class="modal-title">Administrar Medicamento - Alvaro</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-
-          <!-- Body -->
-          <div class="modal-body">
-            <form id="formMedicamento">
-
-
-
-              <div class="mb-3">
-                <label>Medicamento</label>
-                <input type="text" class="form-control" name="medicamento">
-
-              </div>
-
-              <div class="mb-3">
-                <label>Dosis / Cantidad </label>
-                <input type="text" class="form-control" name="dosis">
-              </div>
-
-              <div class="mb-3">
-                <label>Vía de Administración</label>
-                <select class="form-control" name="via">
-                  <option>Oral</option>
-                  <option>Intravenosa (IV)</option>
-                  <option>Intramuscular (IM)</option>
-                  <option>Subcutánea</option>
-                  <option>Tópica</option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="frecuencia" class="form-label">Realizar operación cada:</label>
-                <select class="form-select" name="frecuencia" id="frecuencia">
-                  <option value="">Seleccione</option>
-                  <option value="30min">30 minutos</option>
-                  <option value="1hr">1 hora</option>
-                  <option value="2hr">2 horas</option>
-                  <option value="4hr">4 horas</option>
-                  <option value="6hr">6 horas</option>
-                  <option value="8hr">8 horas</option>
-                  <option value="12hr">12 horas</option>
-                  <option value="24hr">24 horas</option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label>Hora Programada</label>
-                <input type="time" class="form-control" name="horaProgramada">
-              </div>
-
-              <div class="mb-3">
-                <label>Observaciones / Reacciones</label>
-                <textarea class="form-control" name="observaciones"></textarea>
-              </div>
-
-            </form>
-          </div>
-
-          <!-- Footer -->
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Confirmar Administración</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          </div>
-
-        </div>
-      </div>
-    </div>
   </main>
-  <!-- Modal Administrar Medicamento -->
-  <script src="../assets/js/core/popper.min.js"></script>
+   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>
   <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
   <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
@@ -510,96 +382,42 @@ $resultado = $stmt->get_result();
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
   </script>
-  <script src="../assets/js/soft-ui-dashboard.min.js?v=1.1.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/soft-ui-dashboard.min.js?v=1.1.0"></script>
   <script>
-    function confirmarCerrarSesion(e) {
-      e.preventDefault(); // Evita que el enlace se ejecute directo
-      Swal.fire({
-        title: '¿Estás seguro?',
-        text: 'Se cerrará tu sesión actual',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, cerrar sesión',
-        cancelButtonText: 'Cancelar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = '../pages/cerrar_sesion.php';
-        }
-      });
-    }
-    let idPacienteActual = null; // Variable global para el ID del paciente
-
-    // Función para preparar el modal y cargar datos
-    function prepararModal(idPaciente) {
-      idPacienteActual = idPaciente;
-      console.log('Paciente seleccionado: ' + idPaciente);
-
-      // Hacer la solicitud para cargar los signos vitales
-      fetch('cargar_signos.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: 'id=' + idPacienteActual
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === 'ok') {
-            // Llenar el formulario con los datos de la base de datos
-            document.querySelector('input[name="temperatura"]').value = data.signos.temperatura || '';
-            document.querySelector('input[name="fc"]').value = data.signos.fc || '';
-            document.querySelector('input[name="paSistolica"]').value = data.signos.paSistolica || '';
-            document.querySelector('input[name="paDiastolica"]').value = data.signos.paDiastolica || '';
-            document.querySelector('input[name="fr"]').value = data.signos.fr || '';
-            document.querySelector('input[name="saturacion"]').value = data.signos.saturacion || '';
-            document.querySelector('textarea[name="observaciones"]').value = data.signos.observaciones || '';
-          } else {
-            Swal.fire('Error', 'No se pudieron cargar los datos', 'error');
-          }
-        })
-        .catch(error => {
-          Swal.fire('Error', 'Hubo un problema al cargar los datos', 'error');
-        });
-    }
-
-    function guardarSignosVitales() {
-      if (!idPacienteActual) {
-        Swal.fire('Error', 'No se seleccionó un paciente', 'error');
-        return;
+    document.addEventListener('DOMContentLoaded', function() {
+      // Cargar opciones de hora
+      const horaSelect = document.getElementById('hora');
+      for (let h = 8; h <= 20; h++) {
+        const hora = h.toString().padStart(2, '0');
+        const option = document.createElement('option');
+        option.value = hora;
+        option.textContent = `${hora} hrs`; // Añadir "hrs" al final de la opción
+        horaSelect.appendChild(option);
       }
 
-      Swal.fire({
-        title: '¿Guardar signos vitales?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, guardar',
-        cancelButtonText: 'Cancelar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const formData = new FormData(document.getElementById('formSignosVitales'));
-          formData.append('id', idPacienteActual);
+      // Cargar opciones de minuto (múltiplo de 5)
+      const minutoSelect = document.getElementById('minuto');
+      for (let m = 0; m < 60; m += 5) {
+        const minuto = m.toString().padStart(2, '0');
+        const option = document.createElement('option');
+        option.value = minuto;
+        option.textContent = `${minuto} min`; // Añadir "min" al final de la opción
+        minutoSelect.appendChild(option);
+      }
 
-          fetch('guardar_signos.php', {
-              method: 'POST',
-              body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.status === 'ok') {
-                Swal.fire('Éxito', data.msg, 'success').then(() => location.reload());
-              } else {
-                Swal.fire('Error', data.msg, 'error');
-              }
-            })
-            .catch(() => {
-              Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
-            });
-        }
-      });
-    }
-  </script>
+      // Actualizar hora completa al cambiar hora o minuto
+      const inputHidden = document.getElementById('hora_completa');
 
+      function actualizarHoraCompleta() {
+        const h = horaSelect.value;
+        const m = minutoSelect.value;
+        inputHidden.value = `${h}:${m}`;
+      }
+
+      // Escuchar cambios en los selects
+      horaSelect.addEventListener('change', actualizarHoraCompleta);
+      minutoSelect.addEventListener('change', actualizarHoraCompleta);
+    });
   </script>
 </body>
 

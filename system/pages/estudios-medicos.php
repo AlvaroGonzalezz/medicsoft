@@ -405,7 +405,7 @@ JOIN usuarios ON estudios_medicos.id_paciente = usuarios.id";
                   <option value="">--Selecciona--</option>
                   <?php
                   include '../../conexion.php';
-                  $consulta = "SELECT id, CONCAT(curp, ' ', nombre, ' ', apellidos) AS nombre_completo FROM usuarios WHERE hospitalizado = 0 AND rol = 'Paciente'";
+                  $consulta = "SELECT id, CONCAT(curp, ' ', nombre, ' ', apellidos) AS nombre_completo FROM usuarios WHERE rol = 'Paciente'";
                   $resultado = mysqli_query($conexion, $consulta);
                   while ($row = mysqli_fetch_assoc($resultado)) {
                     echo '<option value="' . $row['id'] . '">' . $row['nombre_completo'] . '</option>';
@@ -519,7 +519,22 @@ JOIN usuarios ON estudios_medicos.id_paciente = usuarios.id";
     </div>
   </main>
   <!-- Modal Administrar Medicamento -->
-
+ <script src="../assets/js/core/popper.min.js"></script>
+  <script src="../assets/js/core/bootstrap.min.js"></script>
+  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
+  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+  <script src="../assets/js/plugins/chartjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      var options = {
+        damping: '0.5'
+      }
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+  </script>
+    <script src="../assets/js/soft-ui-dashboard.min.js?v=1.1.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     function eliminarEstudio(id) {

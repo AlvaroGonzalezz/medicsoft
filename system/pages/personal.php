@@ -98,7 +98,15 @@ $result3 = $conexion->query($sql3);
             <span class="nav-link-text ms-1">Personal</span>
           </a>
         </li>
-
+        <li class="nav-item">
+          <a class="nav-link  " href="../pages/citas-admin.php">
+            <div
+              class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i style="color: #181818;" class="bi bi-calendar-check-fill"></i>
+            </div>
+            <span class="nav-link-text ms-1">Citas</span>
+          </a>
+        </li>
         <!-- <li class="nav-item">
           <a class="nav-link  " href="../pages/virtual-reality.html">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -855,7 +863,21 @@ $result3 = $conexion->query($sql3);
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-
+ <script src="../assets/js/core/popper.min.js"></script>
+  <script src="../assets/js/core/bootstrap.min.js"></script>
+  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
+  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+  <script src="../assets/js/plugins/chartjs.min.js"></script>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      var options = {
+        damping: '0.5'
+      }
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+  </script>
+    <script src="../assets/js/soft-ui-dashboard.min.js?v=1.1.0"></script>
   <script>
     function confirmarCerrarSesion(e) {
       e.preventDefault(); // Evita que el enlace se ejecute directo
@@ -872,6 +894,7 @@ $result3 = $conexion->query($sql3);
         }
       });
     }
+
     function darDeBaja(id) {
       Swal.fire({
         title: 'Eliminar personal',
@@ -887,7 +910,7 @@ $result3 = $conexion->query($sql3);
       });
 
     }
- 
+
     function abrirModalEditar(datos) {
       // Llenar campos con los valores que vienen de la tabla
       document.getElementById('editId').value = datos.id;

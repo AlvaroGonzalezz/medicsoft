@@ -34,7 +34,21 @@ if (isset($_GET['idPaciente'], $_GET['observaciones'], $_GET['idMedico'])) {
         $stmtDelete->execute();
         $stmtDelete->close();
 
+        // Eliminar procedimientos del paciente
+        $stmtProc = $conexion->prepare("DELETE FROM procedimientos WHERE id_paciente = ?");
+        $stmtProc->bind_param("i", $idPaciente);
+        $stmtProc->execute();
+        $stmtProc->close();
+
+        // Eliminar comentarios del paciente
+        $stmtComent = $conexion->prepare("DELETE FROM comentarios WHERE id_paciente = ?");
+        $stmtComent->bind_param("i", $idPaciente);
+        $stmtComent->execute();
+        $stmtComent->close();
+
+        // Confirmar todos los cambios
         $conexion->commit();
+
 
         // ✅ ALERTA de éxito
         echo "
@@ -89,4 +103,3 @@ if (isset($_GET['idPaciente'], $_GET['observaciones'], $_GET['idMedico'])) {
 }
 
 $conexion->close();
-?>

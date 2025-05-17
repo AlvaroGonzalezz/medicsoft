@@ -28,8 +28,9 @@ $stmt->bind_param("i", $idPaciente);
 $stmt->execute();
 $stmt->bind_result($codigo);
 $stmt->fetch();  // Aquí es cuando se obtiene el valor de $codigo
+$stmt->close(); // Cierra la declaración preparada
+mysqli_free_result($result);
 
-$conexion->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -310,6 +311,16 @@ $conexion->close();
             </div>
           </div>
           <div class="row mt-4">
+            <?php
+            $query = "SELECT hospitalizado FROM usuarios WHERE id = $idPaciente";
+            $resultado = mysqli_query($conexion, $query);
+            $datos = mysqli_fetch_assoc($resultado);
+            $estado = $datos['hospitalizado'];
+            if ($estado == 1) {
+              // Si el paciente está hospitalizado, mostrar la tarjeta de seguimiento
+              
+            
+            ?>
             <div class="col-lg-6 col-md-6 col-12">
               <a href="../pages/seguimiento.php?codigo=<?= $codigo ?>">
                 <div class="card">
@@ -329,6 +340,8 @@ $conexion->close();
                 </div>
               </a>
             </div>
+            <?php
+            } ?>
             <div class="col-lg-6 col-md-6 col-12 mt-4 mt-md-0">
               <a href="#" onclick="solicitarCodigo(event)">
                 <div class="card">
