@@ -1,0 +1,29 @@
+Práctica # 3: Captura Basica de Cadenas con Formato
+
+.model small
+
+.stack 100h
+ 
+.data
+ mensaje db 13,10, "Ingrese la cadena: $"
+ cadena db 100 dup(' '),'$'
+ 
+.code
+ principal:
+  mov ax,@data 
+  mov ds,ax
+  
+  lea dx,mensaje
+  mov ah,09h
+  int 21h
+  
+  mov dx,offset cadena
+  mov ah,0ah
+  int 21h
+  
+  mov ax,4C00h
+  int 21h
+  
+ end principal
+
+end
